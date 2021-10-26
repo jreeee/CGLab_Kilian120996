@@ -1,0 +1,4 @@
+#ifndef GEOMETRY_NODE_HPP
+#define GEOMETRY_NODE_HPP
+
+#endif
