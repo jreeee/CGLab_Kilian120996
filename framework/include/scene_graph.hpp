@@ -1,7 +1,7 @@
 #ifndef SCENE_GRAPH_HPP
 #define SCENE_GRAPH_HPP
 
-#include <std::string>
+#include <string>
 
 #include "node.hpp"
 
