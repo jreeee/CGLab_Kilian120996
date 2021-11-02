@@ -10,20 +10,20 @@ class SceneGraph {
     private:
 
         std::string name_;
-        Node root_;
+        std::shared_ptr<Node> root_;
 
     public:
 
         //constructor
-        SceneGraph(Node const& root);
-        SceneGraph(std::string const& name, Node const& root);
+        SceneGraph();
+        SceneGraph(std::string const& name, std::shared_ptr<Node> root);
         //destructor? virtual ~SceneGraph();
         
-        std::string getName();
+        std::string getName() const;
         void setName(std::string const& name);
-        Node getRoot();
-        void setRoot(Node const& root);
-        std::string printGraph();
+        std::shared_ptr<Node> getRoot() const;
+        void setRoot(std::shared_ptr<Node> root);
+        std::string printGraph() const;
 
 };
 

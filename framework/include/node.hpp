@@ -23,12 +23,25 @@ class Node {
         Node();
         Node(   std::shared_ptr<Node> parent, 
                 std::vector<std::shared_ptr<Node>> children,
-                std::string name,
-                glm::mat4 localTransform,
-                glm::mat4 worldTransform);
+                std::string const& name,
+                glm::mat4 const& localTransform);
 
         virtual ~Node();
 
+        std::shared_ptr<Node> getParent() const;
+        void setParent(std::shared_ptr<Node> parent);
+        std::shared_ptr<Node> getChildren(std::string const& name) const;
+        std::vector<std::shared_ptr<Node>> getChildrenList() const;
+        std::string getName() const;
+        std::string getPath() const;
+        int getDepth() const;
+        glm::mat4 getLocalTransform() const;
+        void setLocalTarnsform(glm::mat4 const& localTransform);
+        glm::mat4 getWorldTransform() const;
+        void setWorldTransform(glm::mat4 const& worldTransform);
+        void addChildren(std::shared_ptr<Node> child);
+        std::shared_ptr<Node> removeChildren(std::string const& name);
+        
 };
 
 #endif

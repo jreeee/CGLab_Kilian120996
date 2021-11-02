@@ -14,18 +14,17 @@ Node::Node():
 // TDOD generate path, depth
 Node::Node( std::shared_ptr<Node> parent, 
             std::vector<std::shared_ptr<Node>> children,
-            std::string name,
-            glm::mat4 localTransform,
-            glm::mat4 worldTransform ):
+            std::string const& name,
+            glm::mat4 const& localTransform ):
     parent_ {parent},
     children_ {children},
     name_ {name},
-    localTransform_ {localTransform},
-    worldTransform_ {worldTransform}
+    localTransform_ {localTransform}
 {
     depth_ = -1;
     //depth_ = parent->getDepth() + 1;
     path_ = "todo";
     //path_ = parent->getPath() + name_;
+    worldTransform_ = localTransform; //1 should be parent->worldTransform
 }
 
