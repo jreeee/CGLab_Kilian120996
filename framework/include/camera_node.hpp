@@ -3,16 +3,29 @@
 
 #include "node.hpp"
 
-class CameraNode:public Node {
+class CameraNode : public Node {
 
     private:
 
+        // member variables
         bool isPrespective_;
         bool isEnabled_;
         glm::mat4 projectionMatrix_;
 
     public:
+        
+        // con- & destructor
+        CameraNode();
+        CameraNode( std::shared_ptr<Node> parent, 
+                    std::vector<std::shared_ptr<Node>> children,
+                    std::string const& name,
+                    glm::mat4 const& localTransform,
+                    bool perspective, 
+                    bool enabled, 
+                    glm::mat4 const& projectionMatrix );
+        ~CameraNode();
 
+        // methods
         bool getPerspective() const;
         bool getEnabled() const;
         void setEnabled(bool enable);

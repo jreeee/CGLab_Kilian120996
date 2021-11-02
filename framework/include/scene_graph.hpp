@@ -9,16 +9,18 @@ class SceneGraph {
 
     private:
 
+        // member variables
         std::string name_;
         std::shared_ptr<Node> root_;
 
     public:
 
-        //constructor
+        // con- & destructor
         SceneGraph();
         SceneGraph(std::string const& name, std::shared_ptr<Node> root);
-        //destructor? virtual ~SceneGraph();
+        ~SceneGraph();
         
+        // methods
         std::string getName() const;
         void setName(std::string const& name);
         std::shared_ptr<Node> getRoot() const;

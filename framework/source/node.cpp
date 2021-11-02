@@ -1,5 +1,7 @@
 #include "node.hpp"
 
+
+// constructors
 Node::Node():
     parent_ {nullptr},
     children_ {std::vector<std::shared_ptr<Node>>()},
@@ -28,3 +30,4 @@ Node::Node( std::shared_ptr<Node> parent,
     worldTransform_ = localTransform; //1 should be parent->worldTransform
 }
 
+// methods
