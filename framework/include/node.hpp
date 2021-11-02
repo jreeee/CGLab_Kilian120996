@@ -41,6 +41,7 @@ class Node {
         void setWorldTransform(glm::mat4 const& worldTransform);
         void addChildren(std::shared_ptr<Node> child);
         std::shared_ptr<Node> removeChildren(std::string const& name);
+        std::string printChildrenList() const;
         
 };
 

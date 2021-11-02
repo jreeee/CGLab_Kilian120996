@@ -9,8 +9,7 @@ Node::Node():
     path_ {""},
     depth_ {-1},
     localTransform_ {glm::mat4 (1.0)},
-    worldTransform_ {glm::mat4 (1.0)} {
-
+    worldTransform_ {glm::mat4 (1.0)} { 
 }
 
 // TDOD generate path, depth

@@ -13,7 +13,7 @@ class GeometryNode : public Node {
 
     public:
 
-        //con- & destructor
+        // con- & destructor
         GeometryNode();
         GeometryNode(   std::shared_ptr<Node> parent, 
                         std::vector<std::shared_ptr<Node>> children,
