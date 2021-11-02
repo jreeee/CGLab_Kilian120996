@@ -7,19 +7,24 @@
 
 class SceneGraph {
 
-    std::string Name;
-    Node root;
-    //constructor
-    SceneGraph(Node const& root);
-    SceneGraph(std::string const& name, Node const& root);
-    //destructor? virtual ~SceneGraph();
-    
-    std::string getName();
-    void setName(std::string const& name);
-    Node getRoot();
-    void setRoot(Node const& root);
-    std::string printGraph();
+    private:
 
-}
+        std::string name_;
+        Node root_;
+
+    public:
+
+        //constructor
+        SceneGraph(Node const& root);
+        SceneGraph(std::string const& name, Node const& root);
+        //destructor? virtual ~SceneGraph();
+        
+        std::string getName();
+        void setName(std::string const& name);
+        Node getRoot();
+        void setRoot(Node const& root);
+        std::string printGraph();
+
+};
 
 #endif
