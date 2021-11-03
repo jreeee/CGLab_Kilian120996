@@ -173,18 +173,17 @@ int main(int argc, char* argv[]) {
   std::cout << smallarsystem.printGraph();
 
   auto sun = std::make_shared<Node>(root, children, "sun", worldMat);
-
-  std::cout << smallarsystem.printGraph();
-
+  root->addChildren(sun);
   std::cout << smallarsystem.printGraph();
 
   auto notsun = std::make_shared<Node>(sun, children, "notsun", worldMat);
-
+  sun->addChildren(notsun);
   std::cout << smallarsystem.printGraph();
 
   auto testsun1 = std::make_shared<Node>(sun, children, "testsun1", worldMat);
+  sun->addChildren(testsun1);
   auto testsun2 = std::make_shared<Node>(testsun1, children, "testsun2", worldMat);
-
+  testsun1->addChildren(testsun2);
 
   //sun->addChildren(testsun1);
   std::cout << smallarsystem.printGraph();

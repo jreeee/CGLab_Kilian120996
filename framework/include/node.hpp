@@ -45,7 +45,6 @@ class Node {
 
         //can be overwritten by the other node-subclasses
         virtual void printChildrenList(std::stringstream & output);
-
 };
 
 #endif

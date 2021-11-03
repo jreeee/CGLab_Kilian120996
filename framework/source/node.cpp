@@ -47,7 +47,8 @@ void Node::setParent(std::shared_ptr<Node> parent) {
         worldTransform_ = parent_->worldTransform_ * localTransform_;
 
         //update the parent, so that it also has a reference to the node
-        parent_->addChildren(std::make_shared<Node>(*this));
+        //doesn't work sadly
+        //auto ptr = std::make_shared<Node>(*this);
     }
 }
 
@@ -121,13 +122,8 @@ std::shared_ptr<Node> Node::removeChildren(std::string name) {
 }
 
 void Node::printChildrenList(std::stringstream & output) {
-    // if (children_.empty()) {
-    //     for (auto i : children_) {
-    //         i->printChildrenList(output);
-    //     }
-    // }
-    if (!children_.empty()){
-        printChildrenList(output);
-    }
     output << name_ << " \t(N|" << depth_ << ")\n";
+    for (auto i : children_) {
+        i->printChildrenList(output);
+    }
 }
