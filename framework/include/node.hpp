@@ -9,7 +9,7 @@
 
 class Node {
 
-    private:
+    protected:
 
         std::shared_ptr<Node> parent_;
         std::vector<std::shared_ptr<Node>> children_;
@@ -42,7 +42,9 @@ class Node {
         void setWorldTransform(glm::mat4 const& worldTransform);
         void addChildren(std::shared_ptr<Node> child);
         std::shared_ptr<Node> removeChildren(std::string name);
-        void printChildrenList(std::stringstream & output);
+
+        //can be overwritten by the other node-subclasses
+        virtual void printChildrenList(std::stringstream & output);
         
 };
 

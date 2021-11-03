@@ -27,10 +27,13 @@ class CameraNode : public Node {
 
         // methods
         bool getPerspective() const;
+        void setPerspective(bool perspective); //not on the assignment
         bool getEnabled() const;
         void setEnabled(bool enable);
         glm::mat4 getProjectionMatrix() const;
         void setProjectionMatrix(glm::mat4 const& projectionMatrix);
+        
+        void printChildrenList(std::stringstream & output) override;
 
 };
 

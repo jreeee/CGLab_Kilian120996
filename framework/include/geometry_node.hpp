@@ -9,7 +9,7 @@ class GeometryNode : public Node {
     private:
 
         // member variables
-        model model_;
+        std::shared_ptr<model> model_;
 
     public:
 
@@ -19,12 +19,14 @@ class GeometryNode : public Node {
                         std::vector<std::shared_ptr<Node>> children,
                         std::string const& name,
                         glm::mat4 const& localTransform,
-                        std::shared_ptr<model> model );
+                        std::shared_ptr<model> model_ptr );
         ~GeometryNode();
 
         // methods
         std::shared_ptr<model> getModel() const;
         void setModel(std::shared_ptr<model> model_ptr);
+        
+        void printChildrenList(std::stringstream & output) override;
 
 };
 

@@ -106,7 +106,7 @@ std::shared_ptr<Node> Node::removeChildren(std::string name) {
 }
 
 void Node::printChildrenList(std::stringstream & output) {
-    output << name_ << " (" << depth_ << ")\n";
+    output << name_ << " \t(N|" << depth_ << ")\n";
     for (auto i : children_) {
         i->printChildrenList(output);
     }
