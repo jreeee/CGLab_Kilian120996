@@ -17,8 +17,12 @@ using namespace gl;
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// SceneGraph from assignment 1
-#include "../../framework/include/scene_graph.hpp"
+// SceneGraph and nodes from assignment 1
+#include <scene_graph.hpp>
+#include <geometry_node.hpp>
+#include <camera_node.hpp>
+#include <pointlight_node.hpp>
+
 
 #include <iostream>
 
@@ -164,35 +168,73 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
 int main(int argc, char* argv[]) {
   //Application::run<ApplicationSolar>(argc, argv, 3, 2);
 
- 
+  auto mdl_ptr = std::make_shared<model>();
+  //creation of the root node
   auto root = std::make_shared<Node>(nullptr, "Root");
+  auto camera = std::make_shared<CameraNode>(root, "Camera", true, true, glm::mat4());
+  root->addChildren(camera);
 
   SceneGraph smallarsystem {"Solar System Scene Graph", root};
 
-  std::cout << smallarsystem.printGraph();
-
-  auto sun = std::make_shared<Node>(root, "sun");
+  auto sun = std::make_shared<PointLightNode>(root, "PointLight", 100.0f);
   root->addChildren(sun);
+
+  auto sun_geo = std::make_shared<GeometryNode>(sun, "Sun Geometry", mdl_ptr);
+  sun->addChildren(sun_geo);
+
+  auto mercury = std::make_shared<Node>(root, "Mercury");
+  root->addChildren(mercury);
+
+  auto mercury_geo = std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr);
+  mercury->addChildren(mercury_geo);
+
+  auto venus = std::make_shared<Node>(root, "Venus");
+  root->addChildren(venus);
+
+  auto venus_geo = std::make_shared<GeometryNode>(venus, "Mercury Geometry", mdl_ptr);
+  venus->addChildren(venus_geo);
+
+  auto earth = std::make_shared<Node>(root, "Earth");
+  root->addChildren(earth);
+
+  auto earth_geo = std::make_shared<GeometryNode>(earth, "Earth Geometry", mdl_ptr);
+  earth->addChildren(earth_geo);
+
+  auto moon = std::make_shared<Node>(earth, "Moon");
+  earth->addChildren(moon);
+
+  auto moon_geo = std::make_shared<GeometryNode>(moon, "Moon Geometry", mdl_ptr);
+  moon->addChildren(moon_geo);
+
+  auto mars = std::make_shared<Node>(root, "Mars");
+  root->addChildren(mars);
+
+  auto mars_geo = std::make_shared<GeometryNode>(mars, "Mars Geometry", mdl_ptr);
+  mars->addChildren(mars_geo);
+
+  auto jupiter = std::make_shared<Node>(root, "Jupiter");
+  root->addChildren(jupiter);
+
+  auto jupiter_geo = std::make_shared<GeometryNode>(jupiter, "Jupiter Geometry", mdl_ptr);
+  jupiter->addChildren(jupiter_geo);  
+
+  auto saturn = std::make_shared<Node>(root, "Saturn");
+  root->addChildren(saturn);
+
+  auto saturn_geo = std::make_shared<GeometryNode>(saturn, "Saturn Geometry", mdl_ptr);
+  saturn->addChildren(saturn_geo);
+
+  auto uranus = std::make_shared<Node>(root, "Uranus");
+  root->addChildren(uranus);
+
+  auto uranus_geo = std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr);
+  uranus->addChildren(uranus_geo);
+
+  auto neptune = std::make_shared<Node>(root, "Neptune");
+  root->addChildren(neptune);
+
+  auto neptune_geo = std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr);
+  neptune->addChildren(neptune_geo);
+
   std::cout << smallarsystem.printGraph();
-
-  auto notsun = std::make_shared<Node>(sun, "notsun");
-  sun->addChildren(notsun);
-  std::cout << smallarsystem.printGraph();
-
-  auto testsun1 = std::make_shared<Node>(sun, "testsun1");
-  sun->addChildren(testsun1);
-  auto testsun2 = std::make_shared<Node>(testsun1, "testsun2");
-  testsun1->addChildren(testsun2);
-
-  //sun->addChildren(testsun1);
-  std::cout << smallarsystem.printGraph();
-
-  //root->removeChildren("sun");
-
-
-  std::cout << root->getPath() << sun->getPath() << notsun->getPath() << testsun1->getPath() << testsun2->getPath();
-
-
-
-
 }

@@ -38,10 +38,10 @@ std::string SceneGraph::printGraph() {
 
     //String with the basic information, the rest will be appended
     std::stringstream graph;
-    std::string info = "Scene Graph of " + name_ + "\n"
-                        + "Node Name, ( Type | Depth ):\n."
-                        + root_->getName() + "(R|" 
-                        + std::to_string(root_->getDepth()) + ")\n";
+    std::string info = "\nScene Graph of " + name_ + "\n\n"
+                        + "( Type | Depth ) Node Name:\n-----------------\n"
+                        + "( R | " + std::to_string(root_->getDepth()) 
+                        + " ) " + root_->getName();
     graph << info;
     for(auto i : root_->getChildrenList()){
         // printChildrenList() will recursively print all Nodes in the SceneGraph
