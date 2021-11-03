@@ -23,7 +23,7 @@ class Node {
 
         Node();
         Node(   std::shared_ptr<Node> parent, 
-                std::vector<std::shared_ptr<Node>> children,
+                std::vector<std::shared_ptr<Node>> const& children,
                 std::string const& name,
                 glm::mat4 const& localTransform);
 
@@ -45,7 +45,8 @@ class Node {
 
         //can be overwritten by the other node-subclasses
         virtual void printChildrenList(std::stringstream & output);
-        
+        //is called to set / update mem vars
+        void updateNode(std::shared_ptr<Node> parent, std::string const& name, glm::mat4 const& localTransform);
 };
 
 #endif

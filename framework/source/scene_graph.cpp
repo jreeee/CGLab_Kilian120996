@@ -13,6 +13,10 @@ SceneGraph::SceneGraph(std::string const& name, std::shared_ptr<Node> root):
     root_ {root} {
 }
 
+SceneGraph::~SceneGraph() {
+    root_ = nullptr;
+}
+
 // methods
 std::string SceneGraph::getName() const {
     return name_;

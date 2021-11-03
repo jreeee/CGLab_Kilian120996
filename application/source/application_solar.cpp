@@ -162,8 +162,41 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
 
 // exe entry point
 int main(int argc, char* argv[]) {
-  Application::run<ApplicationSolar>(argc, argv, 3, 2);
-  std::vector<std::shared_ptr<Node>> children {{nullptr}};
-  glm::mat4 worldMat = glm::mat4();
-  auto root = std::make_shared<Node>(nullptr, children, "root", worldMat);
+  //Application::run<ApplicationSolar>(argc, argv, 3, 2);
+
+  std::vector<std::shared_ptr<Node>> children {};
+  glm::mat4 worldMat{};
+  auto root = std::make_shared<Node>(nullptr, children, "Root", worldMat);
+
+  SceneGraph smallarsystem {"Solar System Scene Graph", root};
+
+  std::cout << smallarsystem.printGraph();
+
+  auto sun = std::make_shared<Node>(root, children, "sun", worldMat);
+
+  std::cout << smallarsystem.printGraph();
+
+  std::cout << smallarsystem.printGraph();
+
+  auto notsun = std::make_shared<Node>(root, children, "notsun", worldMat);
+
+  
+  std::cout << smallarsystem.printGraph();
+
+  auto testsun1 = std::make_shared<Node>(sun, children, "testsun1", worldMat);
+  auto testsun2 = std::make_shared<Node>(testsun1, children, "testsun2", worldMat);
+
+
+  std::cout << smallarsystem.printGraph();
+
+  //root->removeChildren("sun");
+  if ( testsun1->getChildren("testsun2") != nullptr ) {
+    std::cout << "yay";
+  }
+
+  std::cout << root->getPath() << sun->getPath() << notsun->getPath() << testsun1->getPath() << testsun2->getPath();
+
+
+
+
 }

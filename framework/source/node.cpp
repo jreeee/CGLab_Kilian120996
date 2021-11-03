@@ -4,7 +4,7 @@
 // constructors
 Node::Node():
     parent_ {nullptr},
-    children_ {std::vector<std::shared_ptr<Node>>()},
+    children_ {std::vector<std::shared_ptr<Node>>{}},
     name_ {"default"},
     path_ {""},
     depth_ {-1},
@@ -14,7 +14,7 @@ Node::Node():
 
 // TDOD generate path, depth
 Node::Node( std::shared_ptr<Node> parent, 
-            std::vector<std::shared_ptr<Node>> children,
+            std::vector<std::shared_ptr<Node>> const& children,
             std::string const& name,
             glm::mat4 const& localTransform ):
     parent_ {parent},
@@ -22,18 +22,7 @@ Node::Node( std::shared_ptr<Node> parent,
     name_ {name},
     localTransform_ {localTransform}
 {
-    depth_ = 0;
-    path_ = "";
-    worldTransform_ = localTransform;
-
-    if (parent_ != nullptr) {
-        depth_ = parent_->depth_ + 1;
-        path_ = parent_->path_ + "/" + name_;
-        worldTransform_ = localTransform * parent_->worldTransform_;
-    }
-    else {
-        path_ = "/" + name_;
-    }
+    updateNode(parent, name, localTransform_);
 }
 
 Node::~Node(){
@@ -47,7 +36,7 @@ std::shared_ptr<Node> Node::getParent() const {
 }
 
 void Node::setParent(std::shared_ptr<Node> parent) {
-    parent_ = parent;
+    updateNode(parent, name_, localTransform_);
 }
 
 std::shared_ptr<Node> Node::getChildren(std::string const& name) const {
@@ -92,16 +81,25 @@ void Node::setWorldTransform(glm::mat4 const& worldTransform) {
 }
 
 void Node::addChildren(std::shared_ptr<Node> child) {
-    if (child != nullptr) {
+    // it'd be bad if we were to add a Node with a lesser depth as child
+    if (child != nullptr && child->depth_ > depth_) {
+        //rn you can technically add the same node multiple times, stc.
         children_.push_back(child);
     }
 }
 
 std::shared_ptr<Node> Node::removeChildren(std::string name) {
+
+    //preliminary check if a node with that name is in the vector
     std::shared_ptr<Node> child = getChildren(name);
+
     if (child != nullptr) {
+        //iterating over said vector until we find the first child with that name
         for (auto it = children_.begin(); it != children_.end(); ++it) {
             if ((*(*it)).getName() == name) {
+                //removing the pointer from the child to the parent
+                (*(*it)).parent_ = nullptr;
+                //removing the pointer fom the parent to the child
                 children_.erase(it);
                 return child;
             }
@@ -112,7 +110,34 @@ std::shared_ptr<Node> Node::removeChildren(std::string name) {
 
 void Node::printChildrenList(std::stringstream & output) {
     output << name_ << " \t(N|" << depth_ << ")\n";
-    for (auto i : children_) {
-        i->printChildrenList(output);
+    if (!children_.empty()) {
+        for (auto it = children_.begin(); it != children_.end(); ++it) {
+            (*it)->printChildrenList(output);
+        }
+    }
+}
+
+//this is a custom method that i wrote which is necessary to update Nodes, since if you change parent
+//or name at least the path will be wrong, this tries to avoid redundancy later on
+void Node::updateNode(  std::shared_ptr<Node> parent, 
+                        std::string const& name, 
+                        glm::mat4 const& localTransform) {
+
+    std::string old_name = name_;
+
+    name_ = name;
+    if (parent == nullptr) {
+        path_ = "/" + name_;
+        depth_ = 0;
+        worldTransform_ = localTransform_ = localTransform;
+    }
+    else {
+        path_ = parent_->path_ + "/" + name_;
+        depth_ = parent_->depth_ + 1;
+        localTransform_ = localTransform;
+        worldTransform_ = parent_->worldTransform_ * localTransform;
+
+        //update the parent, so that it also has a reference to the node
+        parent_->addChildren(std::make_shared<Node>(*this));
     }
 }
