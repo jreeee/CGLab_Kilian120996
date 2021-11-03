@@ -142,17 +142,30 @@ void ApplicationSolar::initializeGeometry() {
 void ApplicationSolar::keyCallback(int key, int action, int mods) {
   if (key == GLFW_KEY_W  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, -0.1f});
-    uploadView();
   }
   else if (key == GLFW_KEY_S  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, 0.1f});
-    uploadView();
   }
+  else if (key == GLFW_KEY_A  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform = glm::translate(m_view_transform, glm::fvec3{-0.1f, 0.0f, 0.0f});
+  }
+  else if (key == GLFW_KEY_D  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.1f, 0.0f, 0.0f});
+  }
+  uploadView();
 }
 
 //handle delta mouse movement input
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
+  double multiplier = 0.005;
+  
   // mouse handling
+  m_view_transform = glm::translate(m_view_transform, 
+                                    glm::fvec3{-float(pos_x * multiplier), 0.0f, 0.0f});
+  m_view_transform = glm::translate(m_view_transform,
+                                    glm::fvec3{0.0f, float(pos_y * multiplier), 0.0f});
+
+  uploadView();
 }
 
 //handle resizing
@@ -166,7 +179,7 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
 
 // exe entry point
 int main(int argc, char* argv[]) {
-  //Application::run<ApplicationSolar>(argc, argv, 3, 2);
+  Application::run<ApplicationSolar>(argc, argv, 3, 2);
 
   auto mdl_ptr = std::make_shared<model>();
   //creation of the root node
@@ -191,7 +204,7 @@ int main(int argc, char* argv[]) {
   auto venus = std::make_shared<Node>(root, "Venus");
   root->addChildren(venus);
 
-  auto venus_geo = std::make_shared<GeometryNode>(venus, "Mercury Geometry", mdl_ptr);
+  auto venus_geo = std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr);
   venus->addChildren(venus_geo);
 
   auto earth = std::make_shared<Node>(root, "Earth");
