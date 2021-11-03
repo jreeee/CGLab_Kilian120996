@@ -77,7 +77,7 @@ int Node::getDepth() const {
 }
 
 glm::mat4 Node::getLocalTransform() const {
-    return (parent_ == nullptr) ? parent_->getLocalTransform() : localTransform_; //right one?
+    return localTransform_;
 }
 
 void Node::setLocalTransform(glm::mat4 const& localTransform) {
