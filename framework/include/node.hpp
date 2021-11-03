@@ -45,8 +45,7 @@ class Node {
 
         //can be overwritten by the other node-subclasses
         virtual void printChildrenList(std::stringstream & output);
-        //is called to set / update mem vars
-        void updateNode(std::shared_ptr<Node> parent, std::string const& name, glm::mat4 const& localTransform);
+
 };
 
 #endif

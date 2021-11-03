@@ -17,12 +17,11 @@ Node::Node( std::shared_ptr<Node> parent,
             std::vector<std::shared_ptr<Node>> const& children,
             std::string const& name,
             glm::mat4 const& localTransform ):
-    parent_ {parent},
     children_ {children},
     name_ {name},
     localTransform_ {localTransform}
 {
-    updateNode(parent, name, localTransform_);
+    setParent(parent);
 }
 
 Node::~Node(){
@@ -36,7 +35,20 @@ std::shared_ptr<Node> Node::getParent() const {
 }
 
 void Node::setParent(std::shared_ptr<Node> parent) {
-    updateNode(parent, name_, localTransform_);
+    parent_ = parent;
+    if (parent_ == nullptr) {
+        path_ = "/" + name_;
+        depth_ = 0;
+        worldTransform_ = localTransform_ = glm::mat4{};
+    }
+    else {
+        path_ = parent_->path_ + "/" + name_;
+        depth_ = parent_->depth_ + 1;
+        worldTransform_ = parent_->worldTransform_ * localTransform_;
+
+        //update the parent, so that it also has a reference to the node
+        parent_->addChildren(std::make_shared<Node>(*this));
+    }
 }
 
 std::shared_ptr<Node> Node::getChildren(std::string const& name) const {
@@ -109,35 +121,13 @@ std::shared_ptr<Node> Node::removeChildren(std::string name) {
 }
 
 void Node::printChildrenList(std::stringstream & output) {
+    // if (children_.empty()) {
+    //     for (auto i : children_) {
+    //         i->printChildrenList(output);
+    //     }
+    // }
+    if (!children_.empty()){
+        printChildrenList(output);
+    }
     output << name_ << " \t(N|" << depth_ << ")\n";
-    if (!children_.empty()) {
-        for (auto it = children_.begin(); it != children_.end(); ++it) {
-            (*it)->printChildrenList(output);
-        }
-    }
-}
-
-//this is a custom method that i wrote which is necessary to update Nodes, since if you change parent
-//or name at least the path will be wrong, this tries to avoid redundancy later on
-void Node::updateNode(  std::shared_ptr<Node> parent, 
-                        std::string const& name, 
-                        glm::mat4 const& localTransform) {
-
-    std::string old_name = name_;
-
-    name_ = name;
-    if (parent == nullptr) {
-        path_ = "/" + name_;
-        depth_ = 0;
-        worldTransform_ = localTransform_ = localTransform;
-    }
-    else {
-        path_ = parent_->path_ + "/" + name_;
-        depth_ = parent_->depth_ + 1;
-        localTransform_ = localTransform;
-        worldTransform_ = parent_->worldTransform_ * localTransform;
-
-        //update the parent, so that it also has a reference to the node
-        parent_->addChildren(std::make_shared<Node>(*this));
-    }
 }
