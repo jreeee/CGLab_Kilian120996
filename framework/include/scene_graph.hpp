@@ -2,6 +2,7 @@
 #define SCENE_GRAPH_HPP
 
 #include <string>
+#include <sstream>
 
 #include "node.hpp"
 
@@ -25,7 +26,7 @@ class SceneGraph {
         void setName(std::string const& name);
         std::shared_ptr<Node> getRoot() const;
         void setRoot(std::shared_ptr<Node> root);
-        std::string printGraph() const;
+        std::string printGraph();
 
 };
 

@@ -1,5 +1,7 @@
 #include "scene_graph.hpp"
 
+//TODO Singleton
+
 // constructors
 SceneGraph::SceneGraph():
     name_ {"default scene graph"},
@@ -28,10 +30,17 @@ void SceneGraph::setRoot(std::shared_ptr<Node> root) {
     root_ = root;
 }
 
-std::string SceneGraph::printGraph() const {
-    std::string graph = "Scene Graph of the " + name_ + "\n" ;
+std::string SceneGraph::printGraph() {
+
+    //String with the basic information, the rest will be appended
+    std::stringstream graph;
+    std::string info = "Scene Graph of " + name_ + "\n.Root: "
+                        + root_->getName() + ", Depth: "
+                        + std::to_string(root_->getDepth()) + "\n";
+    graph << info;
     for(auto i : root_->getChildrenList()){
-        graph += i->printChildrenList();
+        // printChildrenList() will recursively print all Nodes in the SceneGraph
+        i->printChildrenList(graph);
     }
-    return graph;
+    return graph.str();
 }

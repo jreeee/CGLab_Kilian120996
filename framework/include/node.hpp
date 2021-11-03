@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include <glm/glm.hpp>
+#include <sstream>
 
 class Node {
 
@@ -36,12 +37,12 @@ class Node {
         std::string getPath() const;
         int getDepth() const;
         glm::mat4 getLocalTransform() const;
-        void setLocalTarnsform(glm::mat4 const& localTransform);
+        void setLocalTransform(glm::mat4 const& localTransform);
         glm::mat4 getWorldTransform() const;
         void setWorldTransform(glm::mat4 const& worldTransform);
         void addChildren(std::shared_ptr<Node> child);
-        std::shared_ptr<Node> removeChildren(std::string const& name);
-        std::string printChildrenList() const;
+        std::shared_ptr<Node> removeChildren(std::string name);
+        void printChildrenList(std::stringstream & output);
         
 };
 
