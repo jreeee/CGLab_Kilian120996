@@ -17,9 +17,7 @@ class CameraNode : public Node {
         // con- & destructor
         CameraNode();
         CameraNode( std::shared_ptr<Node> parent, 
-                    std::vector<std::shared_ptr<Node>> children,
                     std::string const& name,
-                    glm::mat4 const& localTransform,
                     bool perspective, 
                     bool enabled, 
                     glm::mat4 const& projectionMatrix );

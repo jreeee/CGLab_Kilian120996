@@ -164,25 +164,24 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
 int main(int argc, char* argv[]) {
   //Application::run<ApplicationSolar>(argc, argv, 3, 2);
 
-  std::vector<std::shared_ptr<Node>> children {};
-  glm::mat4 worldMat{};
-  auto root = std::make_shared<Node>(nullptr, children, "Root", worldMat);
+ 
+  auto root = std::make_shared<Node>(nullptr, "Root");
 
   SceneGraph smallarsystem {"Solar System Scene Graph", root};
 
   std::cout << smallarsystem.printGraph();
 
-  auto sun = std::make_shared<Node>(root, children, "sun", worldMat);
+  auto sun = std::make_shared<Node>(root, "sun");
   root->addChildren(sun);
   std::cout << smallarsystem.printGraph();
 
-  auto notsun = std::make_shared<Node>(sun, children, "notsun", worldMat);
+  auto notsun = std::make_shared<Node>(sun, "notsun");
   sun->addChildren(notsun);
   std::cout << smallarsystem.printGraph();
 
-  auto testsun1 = std::make_shared<Node>(sun, children, "testsun1", worldMat);
+  auto testsun1 = std::make_shared<Node>(sun, "testsun1");
   sun->addChildren(testsun1);
-  auto testsun2 = std::make_shared<Node>(testsun1, children, "testsun2", worldMat);
+  auto testsun2 = std::make_shared<Node>(testsun1, "testsun2");
   testsun1->addChildren(testsun2);
 
   //sun->addChildren(testsun1);

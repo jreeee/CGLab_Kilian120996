@@ -9,13 +9,11 @@ CameraNode::CameraNode():
 }
 
 CameraNode::CameraNode( std::shared_ptr<Node> parent, 
-                    std::vector<std::shared_ptr<Node>> children,
                     std::string const& name,
-                    glm::mat4 const& localTransform,
                     bool perspective, 
                     bool enabled, 
                     glm::mat4 const& projectionMatrix ):
-    Node(parent, children, name, localTransform),
+    Node(parent, name),
     isPrespective_ {perspective},
     isEnabled_ {enabled},
     projectionMatrix_ {projectionMatrix} {

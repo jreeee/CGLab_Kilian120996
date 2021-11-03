@@ -23,9 +23,7 @@ class Node {
 
         Node();
         Node(   std::shared_ptr<Node> parent, 
-                std::vector<std::shared_ptr<Node>> const& children,
-                std::string const& name,
-                glm::mat4 const& localTransform);
+                std::string const& name);
 
         virtual ~Node();
 

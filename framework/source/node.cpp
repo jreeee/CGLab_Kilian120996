@@ -12,14 +12,11 @@ Node::Node():
     worldTransform_ {glm::mat4()} { 
 }
 
-// TDOD generate path, depth
 Node::Node( std::shared_ptr<Node> parent, 
-            std::vector<std::shared_ptr<Node>> const& children,
-            std::string const& name,
-            glm::mat4 const& localTransform ):
-    children_ {children},
+            std::string const& name):
+    children_ {std::vector<std::shared_ptr<Node>>{}},
     name_ {name},
-    localTransform_ {localTransform}
+    localTransform_ {glm::mat4()}
 {
     setParent(parent);
 }

@@ -6,11 +6,9 @@ GeometryNode::GeometryNode():
 }
 
 GeometryNode::GeometryNode( std::shared_ptr<Node> parent,
-                            std::vector<std::shared_ptr<Node>> children,
                             std::string const& name,
-                            glm::mat4 const& localTransform,
                             std::shared_ptr<model> model_ptr ):
-    Node(parent, children, name, localTransform),
+    Node(parent, name),
     model_ {model_ptr} {
 }
 
