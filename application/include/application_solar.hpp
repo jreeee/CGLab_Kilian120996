@@ -24,11 +24,10 @@ class ApplicationSolar : public Application {
   void resizeCallback(unsigned width, unsigned height);
 
   // draw all objects
-  void render() const; //const?
-  void renderGraph();
+  void render() const;
 
   //render a planet
-  void renderPlanet(std::vector<shared_ptr<GeometryNode>> vecgeo) const;
+  void renderPlanet(std::vector<std::shared_ptr<GeometryNode>> vecgeo) const;
 
  protected:
   void initializeScreenGraph();
@@ -50,6 +49,7 @@ class ApplicationSolar : public Application {
   glm::fmat4 m_view_projection;
   // scene graph
   SceneGraph m_solarsystem;
+  std::vector<std::shared_ptr<GeometryNode>> test;
 };
 
 #endif
