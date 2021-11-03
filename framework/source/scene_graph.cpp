@@ -47,5 +47,6 @@ std::string SceneGraph::printGraph() {
         // printChildrenList() will recursively print all Nodes in the SceneGraph
         i->printChildrenList(graph);
     }
+    graph << std::endl;
     return graph.str();
 }

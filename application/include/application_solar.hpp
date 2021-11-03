@@ -5,6 +5,9 @@
 #include "model.hpp"
 #include "structs.hpp"
 
+#include <scene_graph.hpp>
+#include <geometry_node.hpp>
+
 // gpu representation of model
 class ApplicationSolar : public Application {
  public:
@@ -21,9 +24,14 @@ class ApplicationSolar : public Application {
   void resizeCallback(unsigned width, unsigned height);
 
   // draw all objects
-  void render() const;
+  void render() const; //const?
+  void renderGraph();
+
+  //render a planet
+  void renderPlanet(std::vector<shared_ptr<GeometryNode>> vecgeo) const;
 
  protected:
+  void initializeScreenGraph();
   void initializeShaderPrograms();
   void initializeGeometry();
   // update uniform values
@@ -40,6 +48,8 @@ class ApplicationSolar : public Application {
   glm::fmat4 m_view_transform;
   // camera projection matrix
   glm::fmat4 m_view_projection;
+  // scene graph
+  SceneGraph m_solarsystem;
 };
 
 #endif
