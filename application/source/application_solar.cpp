@@ -43,7 +43,7 @@ ApplicationSolar::~ApplicationSolar() {
 }
 
 void ApplicationSolar::render() const { 
-
+  //including the planets since they should also be displayed
   renderPlanet(test);
   glUseProgram(m_shaders.at("planet").handle);
 
@@ -66,13 +66,12 @@ void ApplicationSolar::render() const {
 
 
 void ApplicationSolar::renderPlanet(std::vector<std::shared_ptr<GeometryNode>> vecgeo) const {
-  // bind shader to upload uniforms
+  // using the vector to get references to the planets to render each one
   for (auto i : vecgeo) {
     glUseProgram(m_shaders.at("planet").handle);
 
     auto model_matrix = i->getLocalTransform();
-    //model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{-1.0f, 0.0f, 0.0f});
-    //model_matrix = glm::translate(model_matrix, glm::fvec3{0.0f, 0.0f, -1.0f});
+  
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
 
@@ -117,13 +116,14 @@ void ApplicationSolar::uploadUniforms() {
   void ApplicationSolar::initializeScreenGraph() {
 
     auto mdl_ptr = std::make_shared<model>();
-    //creation of the root node
+    //creation of the root node and the SceneGraph
     auto root = std::make_shared<Node>(nullptr, "Root");
     auto camera = std::make_shared<CameraNode>(root, "Camera", true, true, glm::mat4());
     root->addChildren(camera);
 
     m_solarsystem = SceneGraph("Solar System Scene Graph", root);
 
+    //adding all the other nodes and their children
     auto sun = std::make_shared<PointLightNode>(root, "PointLight", 100.0f);
     root->addChildren(sun);
 
@@ -185,7 +185,7 @@ void ApplicationSolar::uploadUniforms() {
     neptune->addChildren(neptune_geo);
 
     //could be done with dynamic pointers or the above things could be initialized in the array
-    
+    //moving pointers to all the geometric nodes into the test vector to easily be able to iterate over them later on
     test.push_back(sun_geo);
     test.push_back(mercury_geo);
     test.push_back(venus_geo);
@@ -197,11 +197,24 @@ void ApplicationSolar::uploadUniforms() {
     test.push_back(uranus_geo);
     test.push_back(neptune_geo);
 
-    float distance = 1.0f;
-    for (auto i : test) {
-      distance+=4;
-      i->getParent()->setLocalTransform(glm::translate({}, glm::fvec3{distance, 0.0f, 0.0f}));
-    }
+
+    sun_geo->setLocalTransform(glm::translate({}, glm::fvec3{-16.0f , 0.0f, 0.0f}));
+    mercury_geo->setLocalTransform(glm::translate({}, glm::fvec3{-8.0f , 0.0f, 0.0f}));
+    venus_geo->setLocalTransform(glm::translate({}, glm::fvec3{-4.0f , 0.0f, 0.0f}));
+    mars_geo->setLocalTransform(glm::translate({}, glm::fvec3{8.0f , 0.0f, 0.0f}));
+    jupiter_geo->setLocalTransform(glm::translate({}, glm::fvec3{4.0f , 0.0f, 0.0f}));
+    venus_geo->setLocalTransform(glm::translate({}, glm::fvec3{14.0f , 0.0f, 0.0f}));
+    saturn_geo->setLocalTransform(glm::translate({}, glm::fvec3{17.0f , 0.0f, 0.0f}));
+    uranus_geo->setLocalTransform(glm::translate({}, glm::fvec3{21.0f , 0.0f, 0.0f}));
+    neptune_geo->setLocalTransform(glm::translate({}, glm::fvec3{25.0f , 0.0f, 0.0f}));
+
+
+    //failed attempt to give each element a unique distance from the center
+    //float distance = 3.0f;
+    // for (auto i : test) {
+    //   distance += distance;
+    //   i->getParent()->setLocalTransform(glm::translate({}, glm::fvec3{distance , 0.0f, 0.0f}));
+    // }
   }
 
 // load shader sources
@@ -255,7 +268,7 @@ void ApplicationSolar::initializeGeometry() {
 }
 
 ///////////////////////////// callback functions for window events ////////////
-// handle key input
+// handle key input for w a s d to move around
 void ApplicationSolar::keyCallback(int key, int action, int mods) {
   if (key == GLFW_KEY_W  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.0f, -0.1f});
@@ -274,9 +287,11 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
 
 //handle delta mouse movement input
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
+  //not perfect, but you can kinda look around
+  //ideally i'd be using rotate here but i couldnt get the mat4 to work properly
   double multiplier = 0.005;
   
-  // mouse handling
+  // mouse handling in x and y directions
   m_view_transform = glm::translate(m_view_transform, 
                                     glm::fvec3{-float(pos_x * multiplier), 0.0f, 0.0f});
   m_view_transform = glm::translate(m_view_transform,

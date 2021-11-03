@@ -23,6 +23,7 @@ Node::Node( std::shared_ptr<Node> parent,
 
 Node::~Node(){
     parent_ = nullptr;
+    //the clearing of the vector is the only 'real' use for the deconstructors
     children_.clear();
 }
 
@@ -44,12 +45,13 @@ void Node::setParent(std::shared_ptr<Node> parent) {
         worldTransform_ = parent_->worldTransform_ * localTransform_;
 
         //update the parent, so that it also has a reference to the node
-        //doesn't work sadly
+        //didn't work sadly
         //auto ptr = std::make_shared<Node>(*this);
     }
 }
 
 std::shared_ptr<Node> Node::getChildren(std::string const& name) const {
+    //iterating over all children until there is one with a matching name
     for (auto i : children_) {
         if (i->getName() == name) {
             return i;
@@ -75,7 +77,7 @@ int Node::getDepth() const {
 }
 
 glm::mat4 Node::getLocalTransform() const {
-    return localTransform_;
+    return (parent_ == nullptr) ? parent_->getLocalTransform() : localTransform_; //right one?
 }
 
 void Node::setLocalTransform(glm::mat4 const& localTransform) {
