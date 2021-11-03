@@ -17,6 +17,9 @@ using namespace gl;
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+// SceneGraph from assignment 1
+#include "../../framework/include/scene_graph.hpp"
+
 #include <iostream>
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
@@ -160,4 +163,7 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
 // exe entry point
 int main(int argc, char* argv[]) {
   Application::run<ApplicationSolar>(argc, argv, 3, 2);
+  std::vector<std::shared_ptr<Node>> children {{nullptr}};
+  glm::mat4 worldMat = glm::mat4();
+  auto root = std::make_shared<Node>(nullptr, children, "root", worldMat);
 }

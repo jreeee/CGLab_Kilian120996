@@ -36,6 +36,11 @@ Node::Node( std::shared_ptr<Node> parent,
     }
 }
 
+Node::~Node(){
+    parent_ = nullptr;
+    children_.clear();
+}
+
 // methods
 std::shared_ptr<Node> Node::getParent() const {
     return parent_;

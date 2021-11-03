@@ -22,6 +22,8 @@ CameraNode::CameraNode( std::shared_ptr<Node> parent,
 
 }
 
+CameraNode::~CameraNode() {}
+
 bool CameraNode::getPerspective() const {
     return isPrespective_;
 }

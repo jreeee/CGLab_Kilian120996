@@ -14,6 +14,10 @@ GeometryNode::GeometryNode( std::shared_ptr<Node> parent,
     model_ {model_ptr} {
 }
 
+GeometryNode::~GeometryNode() {
+    model_ = nullptr;
+}
+
 std::shared_ptr<model> GeometryNode::getModel() const {
     return model_;
 }

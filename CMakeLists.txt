@@ -95,7 +95,7 @@ elseif(MSVC)
 	set(CMAKE_CXX_FLAGS_DEBUG "/MDd /Zi")
 endif()
 
-# activate C++ 11
+# activate C++ 11 <- in almost 2022?
 if(NOT MSVC)
     add_definitions(-std=c++11)
     # show all warnings
