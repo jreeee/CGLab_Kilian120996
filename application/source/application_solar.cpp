@@ -45,23 +45,23 @@ ApplicationSolar::~ApplicationSolar() {
 void ApplicationSolar::render() const { 
   //including the planets since they should also be displayed
   renderPlanet();
-  glUseProgram(m_shaders.at("planet").handle);
+  // glUseProgram(m_shaders.at("planet").handle);
 
-    glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{-1.0f, 0.0f, 0.0f});
-    model_matrix = glm::translate(model_matrix, glm::fvec3{0.0f, 0.0f, -1.0f});
-    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
-                      1, GL_FALSE, glm::value_ptr(model_matrix));
+  //   glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{-1.0f, 0.0f, 0.0f});
+  //   model_matrix = glm::translate(model_matrix, glm::fvec3{0.0f, 0.0f, -1.0f});
+  //   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
+  //                     1, GL_FALSE, glm::value_ptr(model_matrix));
 
-    // extra matrix for normal transformation to keep them orthogonal to surface
-    glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
-    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
-                      1, GL_FALSE, glm::value_ptr(normal_matrix));
+  //   // extra matrix for normal transformation to keep them orthogonal to surface
+  //   glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
+  //   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
+  //                     1, GL_FALSE, glm::value_ptr(normal_matrix));
 
-    // bind the VAO to draw
-    glBindVertexArray(planet_object.vertex_AO);
+  //   // bind the VAO to draw
+  //   glBindVertexArray(planet_object.vertex_AO);
 
-    // draw bound vertex array using bound shader
-    glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
+  //   // draw bound vertex array using bound shader
+  //   glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
 }
 
 
@@ -71,6 +71,7 @@ void ApplicationSolar::renderPlanet() const {
     glUseProgram(m_shaders.at("planet").handle);
 
     auto model_matrix = i->getWorldTransform();
+
   
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -201,6 +202,10 @@ void ApplicationSolar::uploadUniforms() {
     for (auto i : geonodes) {
       if (i->getName() == "Moon Geometry") {
         i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{0.0f , 2.0f, 0.0f}));
+      }
+      else if (i->getName() == "Earth Geometry") {
+        distance += 2;
+        i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 2.0f, 0.0f}));
       }
       else {
         distance += 2;

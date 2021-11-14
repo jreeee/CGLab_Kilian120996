@@ -16,7 +16,8 @@ Node::Node( std::shared_ptr<Node> parent,
             std::string const& name):
     children_ {std::vector<std::shared_ptr<Node>>{}},
     name_ {name},
-    localTransform_ {glm::mat4()}
+    localTransform_ {glm::mat4()},
+    worldTransform_ {glm::mat4()}
 {
     setParent(parent);
 }
@@ -37,16 +38,10 @@ void Node::setParent(std::shared_ptr<Node> parent) {
     if (parent_ == nullptr) {
         path_ = "/" + name_;
         depth_ = 0;
-        worldTransform_ = localTransform_ = glm::mat4{};
     }
     else {
         path_ = parent_->path_ + "/" + name_;
         depth_ = parent_->depth_ + 1;
-        worldTransform_ = parent_->worldTransform_ * localTransform_;
-
-        //update the parent, so that it also has a reference to the node
-        //didn't work sadly
-        //auto ptr = std::make_shared<Node>(*this);
     }
 }
 
