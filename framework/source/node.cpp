@@ -52,7 +52,7 @@ void Node::setParent(std::shared_ptr<Node> parent) {
 
 std::shared_ptr<Node> Node::getChildren(std::string const& name) const {
     //iterating over all children until there is one with a matching name
-    for (auto i : children_) {
+    for (auto const& i : children_) {
         if (i->getName() == name) {
             return i;
         }
@@ -85,7 +85,12 @@ void Node::setLocalTransform(glm::mat4 const& localTransform) {
 }
 
 glm::mat4 Node::getWorldTransform() const {
-    return worldTransform_;
+    //getting the worldtransform by recursively going upwards in the "tree"
+    if (parent_ != nullptr) {
+        return parent_->getWorldTransform() * localTransform_;
+    }
+    //if the parent is a nullptr, we have arrived at the root
+    return localTransform_;
 }
 
 void Node::setWorldTransform(glm::mat4 const& worldTransform) {

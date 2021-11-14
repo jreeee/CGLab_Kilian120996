@@ -95,9 +95,9 @@ elseif(MSVC)
 	set(CMAKE_CXX_FLAGS_DEBUG "/MDd /Zi")
 endif()
 
-# activate C++ 11 <- in almost 2022?
+
 if(NOT MSVC)
-    add_definitions(-std=c++11)
+    add_definitions(-std=c++20) #could cause problems, but 4 now i'll try to use it
     # show all warnings
     add_definitions(-Wall -Wconversion -Wextra -Wpedantic -Wno-unused-parameter)
     # force linking with c++11 lib

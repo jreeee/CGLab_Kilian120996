@@ -26,7 +26,7 @@ void GeometryNode::setModel(std::shared_ptr<model> model_ptr) {
 
 void GeometryNode::printChildrenList(std::stringstream & output) {
         output << "\n( G | " << depth_ << " ) " << name_;
-    for (auto i : children_) {
+    for (auto const& i : children_) {
         i->printChildrenList(output);
     }
 }

@@ -48,7 +48,7 @@ void CameraNode::setProjectionMatrix(glm::mat4 const& projectionMatrix) {
 
 void CameraNode::printChildrenList(std::stringstream & output) {
     output << "\n( C | " << depth_ << " ) " << name_;
-    for (auto i : children_) {
+    for (auto const& i: children_) {
         i->printChildrenList(output);
     }
 }

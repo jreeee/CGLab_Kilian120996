@@ -26,7 +26,7 @@ void PointLightNode::setIntensity(float intensity) {
 
 void PointLightNode::printChildrenList(std::stringstream & output) {
     output << "\n( P | " << depth_ << " ) " << name_;
-    for (auto i : children_) {
+    for (auto const& i : children_) {
         i->printChildrenList(output);
     }
 }

@@ -282,14 +282,19 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
   else if (key == GLFW_KEY_D  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.1f, 0.0f, 0.0f});
   }
+  else if (key == GLFW_KEY_SPACE  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, 0.1f, 0.0f});
+  }
+  //interestingly you can't use L-shift like the other keys, likely having to to with the modifier-properties it has
+  else if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_view_transform = glm::translate(m_view_transform, glm::fvec3{0.0f, -0.1f, 0.0f});
+  }
   uploadView();
 }
 
 //handle delta mouse movement input
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
-  //not perfect, but you can kinda look around
-  //ideally i'd be using rotate here but i couldnt get the mat4 to work properly
-  double multiplier = 0.005;
+  double multiplier = 0.005; //stored as a double, so that we can easily multiply with pos_n and then cast to float
   
   // mouse handling in x and y directions
   m_view_transform = glm::rotate( m_view_transform, float(pos_x * multiplier),
