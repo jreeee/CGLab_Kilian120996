@@ -198,23 +198,23 @@ void ApplicationSolar::uploadUniforms() {
     test.push_back(neptune_geo);
 
 
-    sun_geo->setLocalTransform(glm::translate({}, glm::fvec3{-16.0f , 0.0f, 0.0f}));
-    mercury_geo->setLocalTransform(glm::translate({}, glm::fvec3{-8.0f , 0.0f, 0.0f}));
-    venus_geo->setLocalTransform(glm::translate({}, glm::fvec3{-4.0f , 0.0f, 0.0f}));
-    mars_geo->setLocalTransform(glm::translate({}, glm::fvec3{8.0f , 0.0f, 0.0f}));
-    jupiter_geo->setLocalTransform(glm::translate({}, glm::fvec3{4.0f , 0.0f, 0.0f}));
-    venus_geo->setLocalTransform(glm::translate({}, glm::fvec3{14.0f , 0.0f, 0.0f}));
-    saturn_geo->setLocalTransform(glm::translate({}, glm::fvec3{17.0f , 0.0f, 0.0f}));
-    uranus_geo->setLocalTransform(glm::translate({}, glm::fvec3{21.0f , 0.0f, 0.0f}));
-    neptune_geo->setLocalTransform(glm::translate({}, glm::fvec3{25.0f , 0.0f, 0.0f}));
+    // sun_geo->setLocalTransform(glm::translate({}, glm::fvec3{-16.0f , 0.0f, 0.0f}));
+    // mercury_geo->setLocalTransform(glm::translate({}, glm::fvec3{-8.0f , 0.0f, 0.0f}));
+    // venus_geo->setLocalTransform(glm::translate({}, glm::fvec3{-4.0f , 0.0f, 0.0f}));
+    // mars_geo->setLocalTransform(glm::translate({}, glm::fvec3{8.0f , 0.0f, 0.0f}));
+    // jupiter_geo->setLocalTransform(glm::translate({}, glm::fvec3{4.0f , 0.0f, 0.0f}));
+    // venus_geo->setLocalTransform(glm::translate({}, glm::fvec3{14.0f , 0.0f, 0.0f}));
+    // saturn_geo->setLocalTransform(glm::translate({}, glm::fvec3{17.0f , 0.0f, 0.0f}));
+    // uranus_geo->setLocalTransform(glm::translate({}, glm::fvec3{21.0f , 0.0f, 0.0f}));
+    // neptune_geo->setLocalTransform(glm::translate({}, glm::fvec3{25.0f , 0.0f, 0.0f}));
 
 
     //failed attempt to give each element a unique distance from the center
-    //float distance = 3.0f;
-    // for (auto i : test) {
-    //   distance += distance;
-    //   i->getParent()->setLocalTransform(glm::translate({}, glm::fvec3{distance , 0.0f, 0.0f}));
-    // }
+    float distance = 3.0f;
+    for (auto i : test) {
+      distance += distance;
+      i->setLocalTransform(glm::translate({}, glm::fvec3{distance , 0.0f, 0.0f}));
+    }
   }
 
 // load shader sources
@@ -292,10 +292,10 @@ void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
   double multiplier = 0.005;
   
   // mouse handling in x and y directions
-  m_view_transform = glm::translate(m_view_transform, 
-                                    glm::fvec3{-float(pos_x * multiplier), 0.0f, 0.0f});
-  m_view_transform = glm::translate(m_view_transform,
-                                    glm::fvec3{0.0f, float(pos_y * multiplier), 0.0f});
+  m_view_transform = glm::rotate( m_view_transform, float(pos_x * multiplier),
+                                    glm::fvec3{0.0f, -1.0f, 0.0f});
+  m_view_transform = glm::rotate(m_view_transform, float(pos_y * multiplier),
+                                    glm::fvec3{-1.0f, 0.0f, 0.0f});
 
   uploadView();
 }
