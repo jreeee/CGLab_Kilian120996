@@ -29,7 +29,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,planet_object{}
  ,m_view_transform{glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 0.0f, 4.0f})}
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
- ,test {std::vector<std::shared_ptr<GeometryNode>>{}}
+ ,geonodes {std::vector<std::shared_ptr<GeometryNode>>{}}
 {
   initializeScreenGraph();
   initializeGeometry();
@@ -44,7 +44,7 @@ ApplicationSolar::~ApplicationSolar() {
 
 void ApplicationSolar::render() const { 
   //including the planets since they should also be displayed
-  renderPlanet(test);
+  renderPlanet();
   glUseProgram(m_shaders.at("planet").handle);
 
     glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{-1.0f, 0.0f, 0.0f});
@@ -65,12 +65,12 @@ void ApplicationSolar::render() const {
 }
 
 
-void ApplicationSolar::renderPlanet(std::vector<std::shared_ptr<GeometryNode>> vecgeo) const {
+void ApplicationSolar::renderPlanet() const {
   // using the vector to get references to the planets to render each one
-  for (auto i : vecgeo) {
+  for (auto i : geonodes) {
     glUseProgram(m_shaders.at("planet").handle);
 
-    auto model_matrix = i->getLocalTransform();
+    auto model_matrix = i->getWorldTransform();
   
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -121,7 +121,7 @@ void ApplicationSolar::uploadUniforms() {
     auto camera = std::make_shared<CameraNode>(root, "Camera", true, true, glm::mat4());
     root->addChildren(camera);
 
-    m_solarsystem = SceneGraph("Solar System Scene Graph", root);
+    auto solarsystem = SceneGraph("Solar System Scene Graph", root);
 
     //adding all the other nodes and their children
     auto sun = std::make_shared<PointLightNode>(root, "PointLight", 100.0f);
@@ -186,35 +186,28 @@ void ApplicationSolar::uploadUniforms() {
 
     //could be done with dynamic pointers or the above things could be initialized in the array
     //moving pointers to all the geometric nodes into the test vector to easily be able to iterate over them later on
-    test.push_back(sun_geo);
-    test.push_back(mercury_geo);
-    test.push_back(venus_geo);
-    test.push_back(earth_geo);
-    test.push_back(moon_geo);
-    test.push_back(mars_geo);
-    test.push_back(jupiter_geo);
-    test.push_back(saturn_geo);
-    test.push_back(uranus_geo);
-    test.push_back(neptune_geo);
+    geonodes.push_back(sun_geo);
+    geonodes.push_back(mercury_geo);
+    geonodes.push_back(venus_geo);
+    geonodes.push_back(earth_geo);
+    geonodes.push_back(moon_geo);
+    geonodes.push_back(mars_geo);
+    geonodes.push_back(jupiter_geo);
+    geonodes.push_back(saturn_geo);
+    geonodes.push_back(uranus_geo);
+    geonodes.push_back(neptune_geo);
 
-
-    // sun_geo->setLocalTransform(glm::translate({}, glm::fvec3{-16.0f , 0.0f, 0.0f}));
-    // mercury_geo->setLocalTransform(glm::translate({}, glm::fvec3{-8.0f , 0.0f, 0.0f}));
-    // venus_geo->setLocalTransform(glm::translate({}, glm::fvec3{-4.0f , 0.0f, 0.0f}));
-    // mars_geo->setLocalTransform(glm::translate({}, glm::fvec3{8.0f , 0.0f, 0.0f}));
-    // jupiter_geo->setLocalTransform(glm::translate({}, glm::fvec3{4.0f , 0.0f, 0.0f}));
-    // venus_geo->setLocalTransform(glm::translate({}, glm::fvec3{14.0f , 0.0f, 0.0f}));
-    // saturn_geo->setLocalTransform(glm::translate({}, glm::fvec3{17.0f , 0.0f, 0.0f}));
-    // uranus_geo->setLocalTransform(glm::translate({}, glm::fvec3{21.0f , 0.0f, 0.0f}));
-    // neptune_geo->setLocalTransform(glm::translate({}, glm::fvec3{25.0f , 0.0f, 0.0f}));
-
-
-    //failed attempt to give each element a unique distance from the center
     float distance = 3.0f;
-    for (auto i : test) {
-      distance += distance;
-      i->setLocalTransform(glm::translate({}, glm::fvec3{distance , 0.0f, 0.0f}));
+    for (auto i : geonodes) {
+      if (i->getName() == "Moon Geometry") {
+        i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{0.0f , 2.0f, 0.0f}));
+      }
+      else {
+        distance += 2;
+        i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 0.0f, 0.0f}));
+      }
     }
+    std::cout << solarsystem.printGraph();
   }
 
 // load shader sources

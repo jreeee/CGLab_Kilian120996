@@ -27,7 +27,7 @@ class ApplicationSolar : public Application {
   void render() const;
 
   //render a planet
-  void renderPlanet(std::vector<std::shared_ptr<GeometryNode>> vecgeo) const;
+  void renderPlanet() const;
 
  protected:
   void initializeScreenGraph();
@@ -48,8 +48,8 @@ class ApplicationSolar : public Application {
   // camera projection matrix
   glm::fmat4 m_view_projection;
   // scene graph
-  SceneGraph m_solarsystem;
-  std::vector<std::shared_ptr<GeometryNode>> test; //more of a temporary fix
+  //SceneGraph m_solarsystem;
+  std::vector<std::shared_ptr<GeometryNode>> geonodes; //more of a temporary fix
 };
 
 #endif
