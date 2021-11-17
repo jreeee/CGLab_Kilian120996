@@ -143,7 +143,7 @@ void ApplicationSolar::uploadUniforms() {
 
     m_scene_graph = SceneGraph("Solar System Scene Graph", root);
 
-    //adding all the other nodes and their children
+    //adding all the planet nodes
     auto sun = std::make_shared<PointLightNode>(root, "PointLight", 100.0f);
     auto mercury = std::make_shared<Node>(root, "Mercury");
     auto venus = std::make_shared<Node>(root, "Venus");
@@ -155,7 +155,7 @@ void ApplicationSolar::uploadUniforms() {
     auto uranus = std::make_shared<Node>(root, "Uranus");
     auto neptune = std::make_shared<Node>(root, "Neptune");
 
-    //storing pointers to the geo vector while initializing the nodes
+    //storing pointers to the geo vector while initializing the geo nodes
     m_geo = { {std::make_shared<GeometryNode>(sun, "Sun Geometry", mdl_ptr)},
               {std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr)},
               {std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr)},
@@ -167,6 +167,7 @@ void ApplicationSolar::uploadUniforms() {
               {std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr)},
               {std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr)} };
 
+    //adding all the nodes that are children of root
     root->addChildren(camera);
     root->addChildren(sun);
     root->addChildren(mercury);
@@ -177,7 +178,7 @@ void ApplicationSolar::uploadUniforms() {
     root->addChildren(saturn);
     root->addChildren(uranus);
     root->addChildren(neptune);
-
+    //doing the same for the planets (and the moon)
     sun->addChildren(m_geo[0]);
     mercury->addChildren(m_geo[1]);
     venus->addChildren(m_geo[2]);
@@ -217,7 +218,7 @@ void ApplicationSolar::initializeStars() {
 
   std::vector<GLfloat> stars;
 
-  //only to make the loop a bit faster, as these do not change
+  //only to make the loop a bit faster, as these stay constant
   float densityh = float(density) / 2;
   unsigned int rand_brightness = 265 - base_brightness;
   
@@ -227,7 +228,7 @@ void ApplicationSolar::initializeStars() {
       stars.push_back((std::rand() % density) - densityh);
     }
     for (int k = 0; k < 3; ++k) {
-      //we add a randomly generated number to the base value 
+      //we add a randomly generated number to the base value and divide by 256 to get our value
       stars.push_back(float((std::rand() % rand_brightness) + base_brightness)/256);
     }
   }
