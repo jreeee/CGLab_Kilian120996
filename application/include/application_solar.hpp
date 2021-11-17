@@ -51,6 +51,7 @@ class ApplicationSolar : public Application {
   //SceneGraph m_solarsystem;
   //std::vector<std::shared_ptr<GeometryNode>> geonodes; //more of a temporary fix
   SceneGraph m_scene_graph;
+  std::vector<std::shared_ptr<GeometryNode>> m_geo;
 };
 
 #endif

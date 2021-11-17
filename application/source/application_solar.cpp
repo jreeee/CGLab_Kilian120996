@@ -67,22 +67,11 @@ void ApplicationSolar::render() const {
 
 void ApplicationSolar::renderPlanet() const {
   // using the vector to get references to the planets to render each one
-  std::vector<std::shared_ptr<Node>> geo;
-  //geo.push_back(m_scene_graph.getRoot()->getChildren("PointLight")->getChildren("Sun Geometry"));
-  geo.push_back(m_scene_graph.getRoot()->getChildren("Mercury")->getChildren("Mercury Geometry"));
-  geo.push_back(m_scene_graph.getRoot()->getChildren("Venus")->getChildren("Venus Geometry"));
-  geo.push_back(m_scene_graph.getRoot()->getChildren("Mars")->getChildren("Mars Geometry"));
-  geo.push_back(m_scene_graph.getRoot()->getChildren("Earth")->getChildren("Moon")->getChildren("Moon Geometry"));
-  geo.push_back(m_scene_graph.getRoot()->getChildren("Jupiter")->getChildren("Jupiter Geometry"));
-  geo.push_back(m_scene_graph.getRoot()->getChildren("Saturn")->getChildren("Saturn Geometry"));
-  geo.push_back(m_scene_graph.getRoot()->getChildren("Uranus")->getChildren("Uranus Geometry"));
-  geo.push_back(m_scene_graph.getRoot()->getChildren("Neptune")->getChildren("Neptune Geometry"));
 
-  for (auto i : geo) {
+  for (auto i : m_geo) {
     glUseProgram(m_shaders.at("planet").handle);
 
     auto model_matrix = i->getWorldTransform();
-
   
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -135,25 +124,26 @@ void ApplicationSolar::uploadUniforms() {
 
     //adding all the other nodes and their children
     auto sun = std::make_shared<PointLightNode>(root, "PointLight", 100.0f);
-    auto sun_geo = std::make_shared<GeometryNode>(sun, "Sun Geometry", mdl_ptr);
     auto mercury = std::make_shared<Node>(root, "Mercury");
-    auto mercury_geo = std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr);
     auto venus = std::make_shared<Node>(root, "Venus");
-    auto venus_geo = std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr);
     auto earth = std::make_shared<Node>(root, "Earth");
-    auto earth_geo = std::make_shared<GeometryNode>(earth, "Earth Geometry", mdl_ptr);
     auto moon = std::make_shared<Node>(earth, "Moon");
-    auto moon_geo = std::make_shared<GeometryNode>(moon, "Moon Geometry", mdl_ptr);
     auto mars = std::make_shared<Node>(root, "Mars");
-    auto mars_geo = std::make_shared<GeometryNode>(mars, "Mars Geometry", mdl_ptr);
     auto jupiter = std::make_shared<Node>(root, "Jupiter");
-    auto jupiter_geo = std::make_shared<GeometryNode>(jupiter, "Jupiter Geometry", mdl_ptr);
     auto saturn = std::make_shared<Node>(root, "Saturn");
-    auto saturn_geo = std::make_shared<GeometryNode>(saturn, "Saturn Geometry", mdl_ptr);
     auto uranus = std::make_shared<Node>(root, "Uranus");
-    auto uranus_geo = std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr);
     auto neptune = std::make_shared<Node>(root, "Neptune");
-    auto neptune_geo = std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr);
+
+    m_geo = { {std::make_shared<GeometryNode>(sun, "Sun Geometry", mdl_ptr)},
+              {std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr)},
+              {std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr)},
+              {std::make_shared<GeometryNode>(earth, "Earth Geometry", mdl_ptr)},
+              {std::make_shared<GeometryNode>(moon, "Moon Geometry", mdl_ptr)},
+              {std::make_shared<GeometryNode>(mars, "Mars Geometry", mdl_ptr)},
+              {std::make_shared<GeometryNode>(jupiter, "Jupiter Geometry", mdl_ptr)},
+              {std::make_shared<GeometryNode>(saturn, "Saturn Geometry", mdl_ptr)},
+              {std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr)},
+              {std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr)} };
 
     root->addChildren(camera);
     root->addChildren(sun);
@@ -166,46 +156,33 @@ void ApplicationSolar::uploadUniforms() {
     root->addChildren(uranus);
     root->addChildren(neptune);
 
-    sun->addChildren(sun_geo);
-    mercury->addChildren(mercury_geo);
-    venus->addChildren(venus_geo);
-    earth->addChildren(earth_geo);
+    sun->addChildren(m_geo[0]);
+    mercury->addChildren(m_geo[1]);
+    venus->addChildren(m_geo[2]);
+    earth->addChildren(m_geo[3]);
     earth->addChildren(moon);
-    moon->addChildren(moon_geo);
-    mars->addChildren(mars_geo);
-    jupiter->addChildren(jupiter_geo);
-    saturn->addChildren(saturn_geo);
-    uranus->addChildren(uranus_geo);
-    neptune->addChildren(neptune_geo);
+    moon->addChildren(m_geo[4]);
+    mars->addChildren(m_geo[5]);
+    jupiter->addChildren(m_geo[6]);
+    saturn->addChildren(m_geo[7]);
+    uranus->addChildren(m_geo[8]);
+    neptune->addChildren(m_geo[9]);
 
 
-    //could be done with dynamic pointers or the above things could be initialized in the array
-    //moving pointers to all the geometric nodes into the test vector to easily be able to iterate over them later on
-    // geonodes.push_back(sun_geo);
-    // geonodes.push_back(mercury_geo);
-    // geonodes.push_back(venus_geo);
-    // geonodes.push_back(earth_geo);
-    // geonodes.push_back(moon_geo);
-    // geonodes.push_back(mars_geo);
-    // geonodes.push_back(jupiter_geo);
-    // geonodes.push_back(saturn_geo);
-    // geonodes.push_back(uranus_geo);
-    // geonodes.push_back(neptune_geo);
-
-    //float distance = 3.0f;
-  //   for (auto i : root->getChildrenList()->getChildrenList()) {
-  //     if (i->getName() == "Moon Geometry") {
-  //       i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{0.0f , 2.0f, 0.0f}));
-  //     }
-  //     else if (i->getName() == "Earth Geometry") {
-  //       distance += 2;
-  //       i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 2.0f, 0.0f}));
-  //     }
-  //     else {
-  //       distance += 2;
-  //       i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 0.0f, 0.0f}));
-  //     }
-  //   }
+    float distance = 0.0f;
+    for (auto i : m_geo) {
+      if (i->getName() == "Moon Geometry") {
+        i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{0.0f , 2.0f, 0.0f}));
+      }
+      else if (i->getName() == "Earth Geometry") {
+        distance += 2.5f;
+        i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 2.0f, 0.0f}));
+      }
+      else {
+        distance += 2.5f;
+        i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 0.0f, 0.0f}));
+      }
+    }
     std::cout << m_scene_graph.printGraph();
   }
 // load shader sources
