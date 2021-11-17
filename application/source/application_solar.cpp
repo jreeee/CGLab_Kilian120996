@@ -49,8 +49,9 @@ ApplicationSolar::~ApplicationSolar() {
 
 void ApplicationSolar::render() const { 
   //including the planets since they should also be displayed
-  renderPlanet();
   renderStars();
+  renderPlanet();
+
   // glUseProgram(m_shaders.at("planet").handle);
 
   //   glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{-1.0f, 0.0f, 0.0f});
@@ -203,42 +204,39 @@ void ApplicationSolar::uploadUniforms() {
 void ApplicationSolar::initializeStars() {
 
   //parameters for the creation of the stars
-  unsigned int stars_size = 10000;
-  unsigned int density = 10;
+  unsigned int stars_size = 1000000;
+  unsigned int density = 1000;
   unsigned int base_brightness = 100;
 
   std::vector<GLfloat> stars;
 
   //only to make the loop a bit faster, as these do not change
-  int densityh = density / 2;
-  GLfloat tmp;
+  float densityh = float(density) / 2;
   unsigned int rand_brightness = 265 - base_brightness;
   
   for (int i = 0; i < stars_size; ++i) {
     //as we need three coordinate- and colour values we can add another for loop
     for (int j = 0; j < 3; ++j) {
-      tmp = ((std::rand() % density) - densityh);
-      stars.push_back(tmp);
+      stars.push_back((std::rand() % density) - densityh);
     }
     for (int k = 0; k < 3; ++k) {
       //the base brightness is 100, 
-      tmp = ((std::rand() % rand_brightness) + base_brightness);
-      stars.push_back(tmp);
+      stars.push_back((std::rand() % rand_brightness) + base_brightness);
     }
   }
 
   //initialize Vertex Array
-  glGenVertexArrays(1, &star_object.vertex_AO);
+  glGenVertexArrays(GLint(1), &star_object.vertex_AO);
   glBindVertexArray(star_object.vertex_AO);
   //Buffers + Data
-  glGenBuffers(1, &star_object.vertex_BO);
+  glGenBuffers(GLuint(1), &star_object.vertex_BO);
   glBindBuffer(GL_ARRAY_BUFFER, star_object.vertex_BO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float)*stars.size(), stars.data(), GL_STATIC_DRAW);
   //position information via attributes
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, GLsizei(sizeof(float)*3), 0);
+  glEnableVertexArrayAttrib(star_object.vertex_AO, 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, 0);
   //same for color
-  glEnableVertexAttribArray(1);
+  glEnableVertexArrayAttrib(star_object.vertex_AO, 1);
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void*)(sizeof(float)*3));
   //setting the draw mode
   star_object.draw_mode = GL_POINTS;
