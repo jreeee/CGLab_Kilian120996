@@ -155,6 +155,7 @@ void ApplicationSolar::uploadUniforms() {
     auto uranus = std::make_shared<Node>(root, "Uranus");
     auto neptune = std::make_shared<Node>(root, "Neptune");
 
+    //storing pointers to the geo vector while initializing the nodes
     m_geo = { {std::make_shared<GeometryNode>(sun, "Sun Geometry", mdl_ptr)},
               {std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr)},
               {std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr)},
@@ -189,7 +190,7 @@ void ApplicationSolar::uploadUniforms() {
     uranus->addChildren(m_geo[8]);
     neptune->addChildren(m_geo[9]);
 
-
+    //setting a distance for the planets
     float distance = 0.0f;
     for (auto i : m_geo) {
       if (i->getName() == "Moon Geometry") {
@@ -210,9 +211,9 @@ void ApplicationSolar::uploadUniforms() {
 void ApplicationSolar::initializeStars() {
 
   //parameters for the creation of the stars
-  unsigned int stars_size = 1000000;
-  unsigned int density = 1000;
-  unsigned int base_brightness = 100;
+  unsigned int stars_size = 100000;
+  unsigned int density = 150;
+  unsigned int base_brightness = 150;
 
   std::vector<GLfloat> stars;
 
@@ -226,8 +227,8 @@ void ApplicationSolar::initializeStars() {
       stars.push_back((std::rand() % density) - densityh);
     }
     for (int k = 0; k < 3; ++k) {
-      //the base brightness is 100, 
-      stars.push_back((std::rand() % rand_brightness) + base_brightness);
+      //we add a randomly generated number to the base value 
+      stars.push_back(float((std::rand() % rand_brightness) + base_brightness)/256);
     }
   }
 
@@ -240,10 +241,10 @@ void ApplicationSolar::initializeStars() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(float)*stars.size(), stars.data(), GL_STATIC_DRAW);
   //position information via attributes
   glEnableVertexArrayAttrib(star_object.vertex_AO, 0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*6, 0);
   //same for color
   glEnableVertexArrayAttrib(star_object.vertex_AO, 1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void*)(sizeof(float)*3));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*6, (void*)(sizeof(float)*3));
   //setting the draw mode
   star_object.draw_mode = GL_POINTS;
   star_object.num_elements = stars_size;
@@ -264,9 +265,7 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});
   // request uniform locations for shader program
-  //m_shaders.at("star").u_locs["NormalMatrix"] = -1;
   m_shaders.at("star").u_locs["ModelViewMatrix"] = -1;
-  //m_shaders.at("star").u_locs["ViewMatrix"] = -1;
   m_shaders.at("star").u_locs["ProjectionMatrix"] = -1;
 }
 
