@@ -29,11 +29,15 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,planet_object{}
  ,m_view_transform{glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 0.0f, 4.0f})}
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
- ,geonodes {std::vector<std::shared_ptr<GeometryNode>>{}}
+ ,m_scene_graph {}
 {
+  std::cout << "crash init 0";
   initializeScreenGraph();
+  std::cout << "crash init 1";
   initializeGeometry();
+  std::cout << "crash init 2";
   initializeShaderPrograms();
+  std::cout << "crash init 3";
 }
 
 ApplicationSolar::~ApplicationSolar() {
@@ -44,6 +48,7 @@ ApplicationSolar::~ApplicationSolar() {
 
 void ApplicationSolar::render() const { 
   //including the planets since they should also be displayed
+  std::cout << "crash render";
   renderPlanet();
   // glUseProgram(m_shaders.at("planet").handle);
 
@@ -67,7 +72,28 @@ void ApplicationSolar::render() const {
 
 void ApplicationSolar::renderPlanet() const {
   // using the vector to get references to the planets to render each one
-  for (auto i : geonodes) {
+  auto tmp = m_scene_graph.getRoot()->getChildrenList();
+  std::cout<< tmp.size();
+  std::vector<std::shared_ptr<Node>> geo(10);
+  // for (auto i : geo) {
+  //   std::cout << "1\n";
+  //   std::cout << i->getName();
+  // }
+  for (auto const& i : tmp) {
+    geo.insert(geo.end(), i->getChildrenList().begin(), i->getChildrenList().end());
+  }
+  // for (auto i : geo) {
+  //   std::cout << "2\n";
+  //   std::cout << i->getName();
+  // }
+  auto moon_geo = m_scene_graph.getRoot()->getChildren("Earth")->getChildren("Moon")->getChildren("Moon Geometry");
+  geo.insert(geo.end(), 1, moon_geo);
+  std::cout << geo.size();
+  // for (auto i : geo) {
+  //   std::cout << "3\n";
+  //   std::cout << i->getName();
+  // }
+  for (auto i : geo) {
     glUseProgram(m_shaders.at("planet").handle);
 
     auto model_matrix = i->getWorldTransform();
@@ -80,7 +106,6 @@ void ApplicationSolar::renderPlanet() const {
     glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_view_transform) * model_matrix);
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
                       1, GL_FALSE, glm::value_ptr(normal_matrix));
-
     // bind the VAO to draw
     glBindVertexArray(planet_object.vertex_AO);
 
@@ -187,33 +212,35 @@ void ApplicationSolar::uploadUniforms() {
 
     //could be done with dynamic pointers or the above things could be initialized in the array
     //moving pointers to all the geometric nodes into the test vector to easily be able to iterate over them later on
-    geonodes.push_back(sun_geo);
-    geonodes.push_back(mercury_geo);
-    geonodes.push_back(venus_geo);
-    geonodes.push_back(earth_geo);
-    geonodes.push_back(moon_geo);
-    geonodes.push_back(mars_geo);
-    geonodes.push_back(jupiter_geo);
-    geonodes.push_back(saturn_geo);
-    geonodes.push_back(uranus_geo);
-    geonodes.push_back(neptune_geo);
+    // geonodes.push_back(sun_geo);
+    // geonodes.push_back(mercury_geo);
+    // geonodes.push_back(venus_geo);
+    // geonodes.push_back(earth_geo);
+    // geonodes.push_back(moon_geo);
+    // geonodes.push_back(mars_geo);
+    // geonodes.push_back(jupiter_geo);
+    // geonodes.push_back(saturn_geo);
+    // geonodes.push_back(uranus_geo);
+    // geonodes.push_back(neptune_geo);
 
     float distance = 3.0f;
-    for (auto i : geonodes) {
-      if (i->getName() == "Moon Geometry") {
-        i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{0.0f , 2.0f, 0.0f}));
-      }
-      else if (i->getName() == "Earth Geometry") {
-        distance += 2;
-        i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 2.0f, 0.0f}));
-      }
-      else {
-        distance += 2;
-        i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 0.0f, 0.0f}));
-      }
-    }
-    std::cout << solarsystem.printGraph();
-  }
+  //   for (auto i : root->getChildrenList()->getChildrenList()) {
+  //     if (i->getName() == "Moon Geometry") {
+  //       i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{0.0f , 2.0f, 0.0f}));
+  //     }
+  //     else if (i->getName() == "Earth Geometry") {
+  //       distance += 2;
+  //       i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 2.0f, 0.0f}));
+  //     }
+  //     else {
+  //       distance += 2;
+  //       i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 0.0f, 0.0f}));
+  //     }
+  //   }
+  std::cout << "1";
+     //std::cout << solarsystem.printGraph();
+     std::cout << "2";
+   }
 
 // load shader sources
 void ApplicationSolar::initializeShaderPrograms() {

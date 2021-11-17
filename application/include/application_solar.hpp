@@ -49,7 +49,8 @@ class ApplicationSolar : public Application {
   glm::fmat4 m_view_projection;
   // scene graph
   //SceneGraph m_solarsystem;
-  std::vector<std::shared_ptr<GeometryNode>> geonodes; //more of a temporary fix
+  //std::vector<std::shared_ptr<GeometryNode>> geonodes; //more of a temporary fix
+  SceneGraph m_scene_graph;
 };
 
 #endif
