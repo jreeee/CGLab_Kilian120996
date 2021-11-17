@@ -100,27 +100,33 @@ void ApplicationSolar::renderStars() const {
   //and due to the fact that they are stored in an Array we can just use glDrawArray to do that
   glUseProgram(m_shaders.at("star").handle);
   glBindVertexArray(star_object.vertex_AO);
-  glDrawArrays(star_object.draw_mode, GLint(0), star_object.num_elements);
+  glDrawArrays(star_object.draw_mode, 0, star_object.num_elements);
 }
 
 void ApplicationSolar::uploadView() {
   // vertices are transformed in camera space, so camera transform must be inverted
   glm::fmat4 view_matrix = glm::inverse(m_view_transform);
   // upload matrix to gpu
+  glUseProgram(m_shaders.at("planet").handle);
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ViewMatrix"),
+                     1, GL_FALSE, glm::value_ptr(view_matrix));
+  glUseProgram(m_shaders.at("star").handle);
+  glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ModelViewMatrix"),
                      1, GL_FALSE, glm::value_ptr(view_matrix));
 }
 
 void ApplicationSolar::uploadProjection() {
   // upload matrix to gpu
+  glUseProgram(m_shaders.at("planet").handle);
   glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ProjectionMatrix"),
+                     1, GL_FALSE, glm::value_ptr(m_view_projection));
+  glUseProgram(m_shaders.at("star").handle);
+  glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ProjectionMatrix"),
                      1, GL_FALSE, glm::value_ptr(m_view_projection));
 }
 
 // update uniform locations
 void ApplicationSolar::uploadUniforms() { 
-  // bind shader to which to upload unforms
-  glUseProgram(m_shaders.at("planet").handle);
   // upload uniform values to new locations
   uploadView();
   uploadProjection();
@@ -240,7 +246,7 @@ void ApplicationSolar::initializeStars() {
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void*)(sizeof(float)*3));
   //setting the draw mode
   star_object.draw_mode = GL_POINTS;
-  star_object.num_elements = GLsizei(stars_size);
+  star_object.num_elements = stars_size;
 
 }
 
@@ -258,9 +264,9 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});
   // request uniform locations for shader program
-  m_shaders.at("star").u_locs["NormalMatrix"] = -1;
-  m_shaders.at("star").u_locs["ModelMatrix"] = -1;
-  m_shaders.at("star").u_locs["ViewMatrix"] = -1;
+  //m_shaders.at("star").u_locs["NormalMatrix"] = -1;
+  m_shaders.at("star").u_locs["ModelViewMatrix"] = -1;
+  //m_shaders.at("star").u_locs["ViewMatrix"] = -1;
   m_shaders.at("star").u_locs["ProjectionMatrix"] = -1;
 }
 
