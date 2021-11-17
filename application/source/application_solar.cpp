@@ -72,6 +72,7 @@ void ApplicationSolar::render() const {
 
 void ApplicationSolar::renderPlanet() const {
   // using the vector to get references to the planets to render each one
+<<<<<<< Updated upstream
   auto tmp = m_scene_graph.getRoot()->getChildrenList();
   std::cout<< tmp.size();
   std::vector<std::shared_ptr<Node>> geo(10);
@@ -98,6 +99,21 @@ void ApplicationSolar::renderPlanet() const {
   //   std::cout << "3\n";
   //   std::cout << i->getName();
   // }
+=======
+  std::vector<std::shared_ptr<Node>> geo;
+  //geo.push_back(m_scene_graph.getRoot()->getChildren("PointLight")->getChildren("Sun Geometry"));
+  geo.push_back(m_scene_graph.getRoot()->getChildren("Mercury")->getChildren("Mercury Geometry"));
+  geo.push_back(m_scene_graph.getRoot()->getChildren("Venus")->getChildren("Venus Geometry"));
+  geo.push_back(m_scene_graph.getRoot()->getChildren("Mars")->getChildren("Mars Geometry"));
+  geo.push_back(m_scene_graph.getRoot()->getChildren("Earth")->getChildren("Moon")->getChildren("Moon Geometry"));
+  geo.push_back(m_scene_graph.getRoot()->getChildren("Jupiter")->getChildren("Jupiter Geometry"));
+  geo.push_back(m_scene_graph.getRoot()->getChildren("Saturn")->getChildren("Saturn Geometry"));
+  geo.push_back(m_scene_graph.getRoot()->getChildren("Uranus")->getChildren("Uranus Geometry"));
+  geo.push_back(m_scene_graph.getRoot()->getChildren("Neptune")->getChildren("Neptune Geometry"));
+
+
+  
+>>>>>>> Stashed changes
   for (auto i : geo) {
     glUseProgram(m_shaders.at("planet").handle);
 
@@ -150,70 +166,54 @@ void ApplicationSolar::uploadUniforms() {
     //creation of the root node and the SceneGraph
     auto root = std::make_shared<Node>(nullptr, "Root");
     auto camera = std::make_shared<CameraNode>(root, "Camera", true, true, glm::mat4());
-    root->addChildren(camera);
 
     m_scene_graph = SceneGraph("Solar System Scene Graph", root);
 
     //adding all the other nodes and their children
     auto sun = std::make_shared<PointLightNode>(root, "PointLight", 100.0f);
-    root->addChildren(sun);
-
     auto sun_geo = std::make_shared<GeometryNode>(sun, "Sun Geometry", mdl_ptr);
-    sun->addChildren(sun_geo);
-
     auto mercury = std::make_shared<Node>(root, "Mercury");
-    root->addChildren(mercury);
-
     auto mercury_geo = std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr);
-    mercury->addChildren(mercury_geo);
-
     auto venus = std::make_shared<Node>(root, "Venus");
-    root->addChildren(venus);
-
     auto venus_geo = std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr);
-    venus->addChildren(venus_geo);
-
     auto earth = std::make_shared<Node>(root, "Earth");
-    root->addChildren(earth);
-
     auto earth_geo = std::make_shared<GeometryNode>(earth, "Earth Geometry", mdl_ptr);
-    earth->addChildren(earth_geo);
-
     auto moon = std::make_shared<Node>(earth, "Moon");
-    earth->addChildren(moon);
-
     auto moon_geo = std::make_shared<GeometryNode>(moon, "Moon Geometry", mdl_ptr);
-    moon->addChildren(moon_geo);
-
     auto mars = std::make_shared<Node>(root, "Mars");
-    root->addChildren(mars);
-
     auto mars_geo = std::make_shared<GeometryNode>(mars, "Mars Geometry", mdl_ptr);
-    mars->addChildren(mars_geo);
-
     auto jupiter = std::make_shared<Node>(root, "Jupiter");
-    root->addChildren(jupiter);
-
     auto jupiter_geo = std::make_shared<GeometryNode>(jupiter, "Jupiter Geometry", mdl_ptr);
-    jupiter->addChildren(jupiter_geo);  
-
     auto saturn = std::make_shared<Node>(root, "Saturn");
-    root->addChildren(saturn);
-
     auto saturn_geo = std::make_shared<GeometryNode>(saturn, "Saturn Geometry", mdl_ptr);
-    saturn->addChildren(saturn_geo);
-
     auto uranus = std::make_shared<Node>(root, "Uranus");
-    root->addChildren(uranus);
-
     auto uranus_geo = std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr);
-    uranus->addChildren(uranus_geo);
-
     auto neptune = std::make_shared<Node>(root, "Neptune");
+    auto neptune_geo = std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr);
+
+    root->addChildren(camera);
+    root->addChildren(sun);
+    root->addChildren(mercury);
+    root->addChildren(venus);
+    root->addChildren(mars);
+    root->addChildren(earth);
+    root->addChildren(jupiter);
+    root->addChildren(saturn);
+    root->addChildren(uranus);
     root->addChildren(neptune);
 
-    auto neptune_geo = std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr);
+    sun->addChildren(sun_geo);
+    mercury->addChildren(mercury_geo);
+    venus->addChildren(venus_geo);
+    earth->addChildren(earth_geo);
+    earth->addChildren(moon);
+    moon->addChildren(moon_geo);
+    mars->addChildren(mars_geo);
+    jupiter->addChildren(jupiter_geo);
+    saturn->addChildren(saturn_geo);
+    uranus->addChildren(uranus_geo);
     neptune->addChildren(neptune_geo);
+
 
     //could be done with dynamic pointers or the above things could be initialized in the array
     //moving pointers to all the geometric nodes into the test vector to easily be able to iterate over them later on
@@ -228,7 +228,7 @@ void ApplicationSolar::uploadUniforms() {
     // geonodes.push_back(uranus_geo);
     // geonodes.push_back(neptune_geo);
 
-    float distance = 3.0f;
+    //float distance = 3.0f;
   //   for (auto i : root->getChildrenList()->getChildrenList()) {
   //     if (i->getName() == "Moon Geometry") {
   //       i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{0.0f , 2.0f, 0.0f}));
@@ -245,7 +245,11 @@ void ApplicationSolar::uploadUniforms() {
     std::cout << "1";
     std::cout << m_scene_graph.printGraph();
     std::cout << "2";
+<<<<<<< Updated upstream
    }
+=======
+  }
+>>>>>>> Stashed changes
 
 // load shader sources
 void ApplicationSolar::initializeShaderPrograms() {
