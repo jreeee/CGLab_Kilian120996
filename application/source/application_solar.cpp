@@ -80,14 +80,19 @@ void ApplicationSolar::renderPlanet() const {
   //   std::cout << i->getName();
   // }
   for (auto const& i : tmp) {
-    geo.insert(geo.end(), i->getChildrenList().begin(), i->getChildrenList().end());
+    if (i->getName() == "Earth") {
+      geo.insert(geo.end(), 1, i->getChildren("Moon")->getChildren("Moon Geometry"));
+    }
+    else if (i->getName() != "Camera") {
+      geo.insert(geo.end(), i->getChildrenList().begin(), i->getChildrenList().end());
+    }
   }
   // for (auto i : geo) {
   //   std::cout << "2\n";
   //   std::cout << i->getName();
   // }
-  auto moon_geo = m_scene_graph.getRoot()->getChildren("Earth")->getChildren("Moon")->getChildren("Moon Geometry");
-  geo.insert(geo.end(), 1, moon_geo);
+  // auto moon_geo = m_scene_graph.getRoot()->getChildren("Earth")->getChildren("Moon")->getChildren("Moon Geometry");
+  // geo.insert(geo.end(), 1, moon_geo);
   std::cout << geo.size();
   // for (auto i : geo) {
   //   std::cout << "3\n";
@@ -147,7 +152,7 @@ void ApplicationSolar::uploadUniforms() {
     auto camera = std::make_shared<CameraNode>(root, "Camera", true, true, glm::mat4());
     root->addChildren(camera);
 
-    auto solarsystem = SceneGraph("Solar System Scene Graph", root);
+    m_scene_graph = SceneGraph("Solar System Scene Graph", root);
 
     //adding all the other nodes and their children
     auto sun = std::make_shared<PointLightNode>(root, "PointLight", 100.0f);
@@ -237,9 +242,9 @@ void ApplicationSolar::uploadUniforms() {
   //       i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 0.0f, 0.0f}));
   //     }
   //   }
-  std::cout << "1";
-     //std::cout << solarsystem.printGraph();
-     std::cout << "2";
+    std::cout << "1";
+    std::cout << m_scene_graph.printGraph();
+    std::cout << "2";
    }
 
 // load shader sources
