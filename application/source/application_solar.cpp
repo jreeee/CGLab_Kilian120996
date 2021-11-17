@@ -31,13 +31,9 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
  ,m_scene_graph {}
 {
-  std::cout << "crash init 0";
   initializeScreenGraph();
-  std::cout << "crash init 1";
   initializeGeometry();
-  std::cout << "crash init 2";
   initializeShaderPrograms();
-  std::cout << "crash init 3";
 }
 
 ApplicationSolar::~ApplicationSolar() {
@@ -48,7 +44,6 @@ ApplicationSolar::~ApplicationSolar() {
 
 void ApplicationSolar::render() const { 
   //including the planets since they should also be displayed
-  std::cout << "crash render";
   renderPlanet();
   // glUseProgram(m_shaders.at("planet").handle);
 
@@ -72,34 +67,6 @@ void ApplicationSolar::render() const {
 
 void ApplicationSolar::renderPlanet() const {
   // using the vector to get references to the planets to render each one
-<<<<<<< Updated upstream
-  auto tmp = m_scene_graph.getRoot()->getChildrenList();
-  std::cout<< tmp.size();
-  std::vector<std::shared_ptr<Node>> geo(10);
-  // for (auto i : geo) {
-  //   std::cout << "1\n";
-  //   std::cout << i->getName();
-  // }
-  for (auto const& i : tmp) {
-    if (i->getName() == "Earth") {
-      geo.insert(geo.end(), 1, i->getChildren("Moon")->getChildren("Moon Geometry"));
-    }
-    else if (i->getName() != "Camera") {
-      geo.insert(geo.end(), i->getChildrenList().begin(), i->getChildrenList().end());
-    }
-  }
-  // for (auto i : geo) {
-  //   std::cout << "2\n";
-  //   std::cout << i->getName();
-  // }
-  // auto moon_geo = m_scene_graph.getRoot()->getChildren("Earth")->getChildren("Moon")->getChildren("Moon Geometry");
-  // geo.insert(geo.end(), 1, moon_geo);
-  std::cout << geo.size();
-  // for (auto i : geo) {
-  //   std::cout << "3\n";
-  //   std::cout << i->getName();
-  // }
-=======
   std::vector<std::shared_ptr<Node>> geo;
   //geo.push_back(m_scene_graph.getRoot()->getChildren("PointLight")->getChildren("Sun Geometry"));
   geo.push_back(m_scene_graph.getRoot()->getChildren("Mercury")->getChildren("Mercury Geometry"));
@@ -111,9 +78,6 @@ void ApplicationSolar::renderPlanet() const {
   geo.push_back(m_scene_graph.getRoot()->getChildren("Uranus")->getChildren("Uranus Geometry"));
   geo.push_back(m_scene_graph.getRoot()->getChildren("Neptune")->getChildren("Neptune Geometry"));
 
-
-  
->>>>>>> Stashed changes
   for (auto i : geo) {
     glUseProgram(m_shaders.at("planet").handle);
 
@@ -242,15 +206,8 @@ void ApplicationSolar::uploadUniforms() {
   //       i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 0.0f, 0.0f}));
   //     }
   //   }
-    std::cout << "1";
     std::cout << m_scene_graph.printGraph();
-    std::cout << "2";
-<<<<<<< Updated upstream
-   }
-=======
   }
->>>>>>> Stashed changes
-
 // load shader sources
 void ApplicationSolar::initializeShaderPrograms() {
   // store shader program objects in container
