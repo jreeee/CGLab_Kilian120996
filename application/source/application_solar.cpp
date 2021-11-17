@@ -27,24 +27,30 @@ using namespace gl;
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
  ,planet_object{}
+ ,star_object{}
  ,m_view_transform{glm::translate(glm::fmat4{}, glm::fvec3{0.0f, 0.0f, 4.0f})}
  ,m_view_projection{utils::calculate_projection_matrix(initial_aspect_ratio)}
  ,m_scene_graph {}
 {
   initializeScreenGraph();
   initializeGeometry();
+  initializeStars();
   initializeShaderPrograms();
 }
 
 ApplicationSolar::~ApplicationSolar() {
   glDeleteBuffers(1, &planet_object.vertex_BO);
   glDeleteBuffers(1, &planet_object.element_BO);
+  glDeleteBuffers(1, &star_object.vertex_BO);
+  glDeleteBuffers(1, &star_object.element_BO);
   glDeleteVertexArrays(1, &planet_object.vertex_AO);
+  glDeleteVertexArrays(1, &star_object.vertex_AO);
 }
 
 void ApplicationSolar::render() const { 
   //including the planets since they should also be displayed
   renderPlanet();
+  renderStars();
   // glUseProgram(m_shaders.at("planet").handle);
 
   //   glm::fmat4 model_matrix = glm::rotate(glm::fmat4{}, float(glfwGetTime()), glm::fvec3{-1.0f, 0.0f, 0.0f});
@@ -86,6 +92,14 @@ void ApplicationSolar::renderPlanet() const {
     // draw bound vertex array using bound shader
     glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
   }
+}
+
+void ApplicationSolar::renderStars() const {
+  //doing essentially the same as with the planets but since they don't move we don't need special matrices
+  //and due to the fact that they are stored in an Array we can just use glDrawArray to do that
+  glUseProgram(m_shaders.at("star").handle);
+  glBindVertexArray(star_object.vertex_AO);
+  glDrawArrays(star_object.draw_mode, GLint(0), star_object.num_elements);
 }
 
 void ApplicationSolar::uploadView() {
@@ -185,6 +199,53 @@ void ApplicationSolar::uploadUniforms() {
     }
     std::cout << m_scene_graph.printGraph();
   }
+
+void ApplicationSolar::initializeStars() {
+
+  //parameters for the creation of the stars
+  unsigned int stars_size = 10000;
+  unsigned int density = 10;
+  unsigned int base_brightness = 100;
+
+  std::vector<GLfloat> stars;
+
+  //only to make the loop a bit faster, as these do not change
+  int densityh = density / 2;
+  GLfloat tmp;
+  unsigned int rand_brightness = 265 - base_brightness;
+  
+  for (int i = 0; i < stars_size; ++i) {
+    //as we need three coordinate- and colour values we can add another for loop
+    for (int j = 0; j < 3; ++j) {
+      tmp = ((std::rand() % density) - densityh);
+      stars.push_back(tmp);
+    }
+    for (int k = 0; k < 3; ++k) {
+      //the base brightness is 100, 
+      tmp = ((std::rand() % rand_brightness) + base_brightness);
+      stars.push_back(tmp);
+    }
+  }
+
+  //initialize Vertex Array
+  glGenVertexArrays(1, &star_object.vertex_AO);
+  glBindVertexArray(star_object.vertex_AO);
+  //Buffers + Data
+  glGenBuffers(1, &star_object.vertex_BO);
+  glBindBuffer(GL_ARRAY_BUFFER, star_object.vertex_BO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*stars.size(), stars.data(), GL_STATIC_DRAW);
+  //position information via attributes
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, GLsizei(sizeof(float)*3), 0);
+  //same for color
+  glEnableVertexAttribArray(1);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void*)(sizeof(float)*3));
+  //setting the draw mode
+  star_object.draw_mode = GL_POINTS;
+  star_object.num_elements = GLsizei(stars_size);
+
+}
+
 // load shader sources
 void ApplicationSolar::initializeShaderPrograms() {
   // store shader program objects in container
@@ -195,6 +256,14 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
   m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
   m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
+
+  m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
+                                           {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});
+  // request uniform locations for shader program
+  m_shaders.at("star").u_locs["NormalMatrix"] = -1;
+  m_shaders.at("star").u_locs["ModelMatrix"] = -1;
+  m_shaders.at("star").u_locs["ViewMatrix"] = -1;
+  m_shaders.at("star").u_locs["ProjectionMatrix"] = -1;
 }
 
 // load models
