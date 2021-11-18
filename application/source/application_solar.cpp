@@ -148,7 +148,7 @@ void ApplicationSolar::uploadUniforms() {
     auto mercury = std::make_shared<Node>(root, "Mercury");
     auto venus = std::make_shared<Node>(root, "Venus");
     auto earth = std::make_shared<Node>(root, "Earth");
-    auto moon = std::make_shared<Node>(earth, "Moon");
+    auto moon = std::make_shared<Node>(nullptr, "Moon"); //earth geo, not instantiated
     auto mars = std::make_shared<Node>(root, "Mars");
     auto jupiter = std::make_shared<Node>(root, "Jupiter");
     auto saturn = std::make_shared<Node>(root, "Saturn");
@@ -183,7 +183,8 @@ void ApplicationSolar::uploadUniforms() {
     mercury->addChildren(m_geo[1]);
     venus->addChildren(m_geo[2]);
     earth->addChildren(m_geo[3]);
-    earth->addChildren(moon);
+    m_geo[3]->addChildren(moon);
+    moon->setParent(m_geo[3]);
     moon->addChildren(m_geo[4]);
     mars->addChildren(m_geo[5]);
     jupiter->addChildren(m_geo[6]);
