@@ -78,8 +78,14 @@ void ApplicationSolar::renderPlanet() const {
   for (auto i : m_geo) {
     glUseProgram(m_shaders.at("planet").handle);
 
+    auto i_parent = i->getParent();
+    i_parent->setLocalTransform(glm::rotate(i_parent->getWorldTransform(), 
+                                            float(0.04f * i->getRot()), 
+                                            glm::fvec3{0.0f, 0.0f, -1.0f}));
+
+
     auto model_matrix = i->getWorldTransform();
-  
+    //model_matrix = glm::rotate(model_matrix, float(i->getSpin()), glm::fvec3{0.0f, 1.0f, 0.0f});
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
 
@@ -156,16 +162,16 @@ void ApplicationSolar::uploadUniforms() {
     auto neptune = std::make_shared<Node>(root, "Neptune");
 
     //storing pointers to the geo vector while initializing the geo nodes
-    m_geo = { {std::make_shared<GeometryNode>(sun, "Sun Geometry", mdl_ptr)},
-              {std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr)},
-              {std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr)},
-              {std::make_shared<GeometryNode>(earth, "Earth Geometry", mdl_ptr)},
-              {std::make_shared<GeometryNode>(moon, "Moon Geometry", mdl_ptr)},
-              {std::make_shared<GeometryNode>(mars, "Mars Geometry", mdl_ptr)},
-              {std::make_shared<GeometryNode>(jupiter, "Jupiter Geometry", mdl_ptr)},
-              {std::make_shared<GeometryNode>(saturn, "Saturn Geometry", mdl_ptr)},
-              {std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr)},
-              {std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr)} };
+    m_geo = { {std::make_shared<GeometryNode>(sun, "Sun Geometry", mdl_ptr, 0.0f, 1.0f)},
+              {std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr, 0.2f, 0.3f)},
+              {std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr, 0.3f, 0.1f)},
+              {std::make_shared<GeometryNode>(earth, "Earth Geometry", mdl_ptr, 0.25f, 0.4f)},
+              {std::make_shared<GeometryNode>(moon, "Moon Geometry", mdl_ptr, 0.4f, 0.23f)},
+              {std::make_shared<GeometryNode>(mars, "Mars Geometry", mdl_ptr, 0.32f, 0.14f)},
+              {std::make_shared<GeometryNode>(jupiter, "Jupiter Geometry", mdl_ptr, 0.13f, 0.26f)},
+              {std::make_shared<GeometryNode>(saturn, "Saturn Geometry", mdl_ptr, 0.06f, 0.31f)},
+              {std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr, 0.15f, 0.27f)},
+              {std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr, 0.17f, 0.23f)} };
 
     //adding all the nodes that are children of root
     root->addChildren(camera);

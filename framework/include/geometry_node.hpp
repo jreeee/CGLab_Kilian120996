@@ -10,6 +10,9 @@ class GeometryNode : public Node {
 
         // member variables
         std::shared_ptr<model> model_;
+        //spin is the rotation around the sun, rotation is the rotation around itself
+        float spin_;
+        float rotation_;
 
     public:
 
@@ -17,7 +20,9 @@ class GeometryNode : public Node {
         GeometryNode();
         GeometryNode(   std::shared_ptr<Node> parent, 
                         std::string const& name,
-                        std::shared_ptr<model> model_ptr );
+                        std::shared_ptr<model> model_ptr,
+                        float spin,
+                        float rotation );
         ~GeometryNode();
 
         // methods
@@ -25,7 +30,8 @@ class GeometryNode : public Node {
         void setModel(std::shared_ptr<model> model_ptr);
         
         void printChildrenList(std::stringstream & output) override;
-
+        float getSpin() const;
+        float getRot() const;
 };
 
 #endif

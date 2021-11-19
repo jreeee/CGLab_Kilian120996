@@ -7,9 +7,13 @@ GeometryNode::GeometryNode():
 
 GeometryNode::GeometryNode( std::shared_ptr<Node> parent,
                             std::string const& name,
-                            std::shared_ptr<model> model_ptr ):
+                            std::shared_ptr<model> model_ptr,
+                            float spin,
+                            float rotation):
     Node(parent, name),
-    model_ {model_ptr} {
+    model_ {model_ptr},
+    spin_ {spin},
+    rotation_ {rotation} {
 }
 
 GeometryNode::~GeometryNode() {
@@ -29,4 +33,12 @@ void GeometryNode::printChildrenList(std::stringstream & output) {
     for (auto const& i : children_) {
         i->printChildrenList(output);
     }
+}
+
+float GeometryNode::getSpin() const {
+    return spin_;
+}
+
+float GeometryNode::getRot() const {
+    return rotation_;
 }
