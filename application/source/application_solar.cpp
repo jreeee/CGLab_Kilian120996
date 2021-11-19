@@ -192,20 +192,13 @@ void ApplicationSolar::uploadUniforms() {
     uranus->addChildren(m_geo[8]);
     neptune->addChildren(m_geo[9]);
 
-    //setting a distance for the planets
-    float distance = 0.0f;
-    for (auto i : m_geo) {
-      if (i->getName() == "Moon Geometry") {
-        i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{0.0f , 2.0f, 0.0f}));
-      }
-      else if (i->getName() == "Earth Geometry") {
-        distance += 2.5f;
-        i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 2.0f, 0.0f}));
-      }
-      else {
-        distance += 2.5f;
-        i->setLocalTransform(glm::translate(i->getLocalTransform(), glm::fvec3{distance , 0.0f, 0.0f}));
-      }
+    //setting distance and scale for the planets
+    std::vector<float> dist {0.0f, 1.5f, 3.2f, 5.0f, 0.5f, 6.7f, 9.8f, 11.6f, 13.0f, 15.2f};
+    std::vector<float> scale {1.0f, 0.7f, 0.4f, 0.5f, 0.2f, 0.35f, 0.7f, 0.6f, 0.4f, 0.3f};
+
+    for (int i = 0; i < m_geo.size(); ++i) {
+      m_geo[i]->setLocalTransform(glm::translate(m_geo[i]->getLocalTransform(), glm::fvec3{0.0f , dist[i], 0.0f}));
+      m_geo[i]->setLocalTransform(glm::scale(m_geo[i]->getLocalTransform(), glm::fvec3{scale[i], scale[i], scale[i]}));
     }
     std::cout << m_scene_graph.printGraph();
   }
