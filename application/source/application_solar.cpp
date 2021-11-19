@@ -16,6 +16,8 @@ using namespace gl;
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/type_ptr.hpp>
+//debug
+#include <glm/gtx/string_cast.hpp>
 
 // SceneGraph and nodes from assignment 1
 #include <camera_node.hpp>
@@ -76,16 +78,24 @@ void ApplicationSolar::renderPlanet() const {
   // using the vector to get references to the planets to render each one
 
   for (auto i : m_geo) {
+    if (i->getName() != "Moon Geometry") {
+      auto i_parent = i->getParent();
+      i_parent->setLocalTransform(glm::rotate(i_parent->getWorldTransform(), 
+                                            float(0.001f * i->getRot()), 
+                                            glm::fvec3{0.0f, 0.0f, -1.0f}));
+    }
     glUseProgram(m_shaders.at("planet").handle);
 
-    auto i_parent = i->getParent();
-    i_parent->setLocalTransform(glm::rotate(i_parent->getWorldTransform(), 
-                                            float(0.04f * i->getRot()), 
-                                            glm::fvec3{0.0f, 0.0f, -1.0f}));
-
-
     auto model_matrix = i->getWorldTransform();
-    //model_matrix = glm::rotate(model_matrix, float(i->getSpin()), glm::fvec3{0.0f, 1.0f, 0.0f});
+    //model_matrix = glm::rotate(model_matrix, float(i->getSpin()), glm::fvec3{-1.0f, 0.0f, 0.0f});
+    //i->setLocalTransform(model_matrix);
+    if (i->getName() == "Earth Geometry") {
+      std::cout << glm::to_string(model_matrix);
+    }
+    if (i->getName() == "Moon Geometry") {
+      std::cout << glm::to_string(model_matrix) << "\n";
+    }
+    
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
 
@@ -199,8 +209,8 @@ void ApplicationSolar::uploadUniforms() {
     neptune->addChildren(m_geo[9]);
 
     //setting distance and scale for the planets
-    std::vector<float> dist {0.0f, 1.5f, 3.2f, 5.0f, 0.5f, 6.7f, 9.8f, 11.6f, 13.0f, 15.2f};
-    std::vector<float> scale {1.0f, 0.7f, 0.4f, 0.5f, 0.2f, 0.35f, 0.7f, 0.6f, 0.4f, 0.3f};
+    std::vector<float> dist {0.0f, 1.5f, 3.2f, 5.0f, 2.0f, 6.7f, 9.8f, 11.6f, 13.0f, 15.2f};
+    std::vector<float> scale {1.0f, 0.35f, 0.4f, 0.5f, 0.5f, 0.35f, 0.7f, 0.6f, 0.4f, 0.3f};
 
     for (int i = 0; i < m_geo.size(); ++i) {
       m_geo[i]->setLocalTransform(glm::translate(m_geo[i]->getLocalTransform(), glm::fvec3{0.0f , dist[i], 0.0f}));
