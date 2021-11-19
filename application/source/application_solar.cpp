@@ -78,23 +78,16 @@ void ApplicationSolar::renderPlanet() const {
   // using the vector to get references to the planets to render each one
 
   for (auto i : m_geo) {
-    if (i->getName() != "Moon Geometry") {
-      auto i_parent = i->getParent();
-      i_parent->setLocalTransform(glm::rotate(i_parent->getWorldTransform(), 
-                                            float(0.001f * i->getRot()), 
+    //rotating the placeholder ni the center
+    auto i_parent = i->getParent();
+    i_parent->setLocalTransform(glm::rotate(i_parent->getLocalTransform(), 
+                                            float(0.01f * i->getRot()), 
                                             glm::fvec3{0.0f, 0.0f, -1.0f}));
-    }
     glUseProgram(m_shaders.at("planet").handle);
 
     auto model_matrix = i->getWorldTransform();
-    //model_matrix = glm::rotate(model_matrix, float(i->getSpin()), glm::fvec3{-1.0f, 0.0f, 0.0f});
-    //i->setLocalTransform(model_matrix);
-    if (i->getName() == "Earth Geometry") {
-      std::cout << glm::to_string(model_matrix);
-    }
-    if (i->getName() == "Moon Geometry") {
-      std::cout << glm::to_string(model_matrix) << "\n";
-    }
+    //rotating the planet around itself
+    model_matrix = glm::rotate(model_matrix, float(i->getSpin()), glm::fvec3{0.0f, -1.0f, 0.0f});
     
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -224,7 +217,7 @@ void ApplicationSolar::initializeStars() {
   //parameters for the creation of the stars
   unsigned int stars_size = 100000;
   unsigned int density = 150;
-  unsigned int base_brightness = 150;
+  unsigned int base_brightness = 100;
 
   std::vector<GLfloat> stars;
 
