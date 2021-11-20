@@ -9,11 +9,15 @@ GeometryNode::GeometryNode( std::shared_ptr<Node> parent,
                             std::string const& name,
                             std::shared_ptr<model> model_ptr,
                             float spin,
-                            float rotation):
+                            float rotation,
+                            float distance,
+                            float size ):
     Node(parent, name),
     model_ {model_ptr},
     spin_ {spin},
-    rotation_ {rotation} {
+    rotation_ {rotation},
+    distance_ {distance},
+    size_ {size} {
 }
 
 GeometryNode::~GeometryNode() {
@@ -41,4 +45,12 @@ float GeometryNode::getSpin() const {
 
 float GeometryNode::getRot() const {
     return rotation_;
+}
+
+float GeometryNode::getDist() const {
+    return distance_;
+}
+
+float GeometryNode::getSize() const {
+    return size_;
 }

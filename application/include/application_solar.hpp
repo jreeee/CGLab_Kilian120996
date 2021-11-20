@@ -29,10 +29,12 @@ class ApplicationSolar : public Application {
   //render a planet
   void renderPlanet() const;
   void renderStars() const;
+  void renderOrbits() const;
 
  protected:
   void initializeScreenGraph();
   void initializeStars();
+  void initializeOrbits();
   void initializeShaderPrograms();
   void initializeGeometry();
   // update uniform values
@@ -45,14 +47,13 @@ class ApplicationSolar : public Application {
   // cpu representation of model
   model_object planet_object;
   model_object star_object;
+  model_object orbit_object;
   
   // camera transform matrix
   glm::fmat4 m_view_transform;
   // camera projection matrix
   glm::fmat4 m_view_projection;
   // scene graph
-  //SceneGraph m_solarsystem;
-  //std::vector<std::shared_ptr<GeometryNode>> geonodes; //more of a temporary fix
   SceneGraph m_scene_graph;
   std::vector<std::shared_ptr<GeometryNode>> m_geo;
 };
