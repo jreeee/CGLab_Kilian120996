@@ -256,19 +256,22 @@ void ApplicationSolar::initializeStars() {
 void ApplicationSolar::initializeOrbits() {
   std::vector<GLfloat> orbits;
 
+  //REDO
+  
   //only to make the loop a bit faster, as these stay constant
   float densityh = float(STAR_DENSITY) / 2;
   unsigned int brightness = 265 - STAR_BRIGHTNESS;
   
+  for (int k = 0; k < 3; ++k) {
+      //we add a randomly generated number to the base value and divide by 256 to get our value
+      orbits.push_back(float((std::rand() % brightness) + STAR_BRIGHTNESS)/256);
+  }
   for (int i = 0; i < STAR_COUNT; ++i) {
     //as we need three coordinate- and colour values we can add another for loop
     for (int j = 0; j < 3; ++j) {
       orbits.push_back((std::rand() % STAR_DENSITY) - densityh);
     }
-    for (int k = 0; k < 3; ++k) {
-      //we add a randomly generated number to the base value and divide by 256 to get our value
-      orbits.push_back(float((std::rand() % brightness) + STAR_BRIGHTNESS)/256);
-    }
+    
   }
 
   //initialize Vertex Array
@@ -280,12 +283,12 @@ void ApplicationSolar::initializeOrbits() {
   glBufferData(GL_ARRAY_BUFFER, sizeof(float)*orbits.size(), orbits.data(), GL_STATIC_DRAW);
   //position information via attributes
   glEnableVertexArrayAttrib(orbit_object.vertex_AO, 0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float)*6, 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); //REDO
   //same for color
   glEnableVertexArrayAttrib(orbit_object.vertex_AO, 1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*6, (void*)(sizeof(float)*3));
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void*)(sizeof(float)*3));
   //setting the draw mode
-  orbit_object.draw_mode = GL_POINTS;
+  orbit_object.draw_mode = GL_LINE_LOOP; //LINE_LOOP
   orbit_object.num_elements = STAR_COUNT;
 }
 
