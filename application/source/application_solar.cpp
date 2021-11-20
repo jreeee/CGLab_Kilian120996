@@ -26,6 +26,13 @@ using namespace gl;
 
 #include <iostream>
 
+//Contstants
+//Stars
+const unsigned int STAR_COUNT = 100000;
+const unsigned int STAR_DENSITY = 150;
+const unsigned int STAR_BRIGHTNESS = 100;
+
+
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
  ,planet_object{}
@@ -214,25 +221,20 @@ void ApplicationSolar::uploadUniforms() {
 
 void ApplicationSolar::initializeStars() {
 
-  //parameters for the creation of the stars
-  unsigned int stars_size = 100000;
-  unsigned int density = 150;
-  unsigned int base_brightness = 100;
-
   std::vector<GLfloat> stars;
 
   //only to make the loop a bit faster, as these stay constant
-  float densityh = float(density) / 2;
-  unsigned int rand_brightness = 265 - base_brightness;
+  float densityh = float(STAR_DENSITY) / 2;
+  unsigned int brightness = 265 - STAR_BRIGHTNESS;
   
-  for (int i = 0; i < stars_size; ++i) {
+  for (int i = 0; i < STAR_COUNT; ++i) {
     //as we need three coordinate- and colour values we can add another for loop
     for (int j = 0; j < 3; ++j) {
-      stars.push_back((std::rand() % density) - densityh);
+      stars.push_back((std::rand() % STAR_DENSITY) - densityh);
     }
     for (int k = 0; k < 3; ++k) {
       //we add a randomly generated number to the base value and divide by 256 to get our value
-      stars.push_back(float((std::rand() % rand_brightness) + base_brightness)/256);
+      stars.push_back(float((std::rand() % brightness) + STAR_BRIGHTNESS)/256);
     }
   }
 
@@ -251,7 +253,7 @@ void ApplicationSolar::initializeStars() {
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*6, (void*)(sizeof(float)*3));
   //setting the draw mode
   star_object.draw_mode = GL_POINTS;
-  star_object.num_elements = stars_size;
+  star_object.num_elements = STAR_COUNT;
 
 }
 
