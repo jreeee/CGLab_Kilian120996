@@ -7,6 +7,17 @@ GeometryNode::GeometryNode():
 
 GeometryNode::GeometryNode( std::shared_ptr<Node> parent,
                             std::string const& name,
+                            float distance ):
+    Node(parent, name),
+    model_ {nullptr},
+    spin_ {0.0f},
+    rotation_ {0.0f},
+    distance_ {distance},
+    size_ {1.0f} {
+}
+
+GeometryNode::GeometryNode( std::shared_ptr<Node> parent,
+                            std::string const& name,
                             std::shared_ptr<model> model_ptr,
                             float spin,
                             float rotation,

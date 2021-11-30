@@ -20,6 +20,11 @@ class GeometryNode : public Node {
 
         // con- & destructor
         GeometryNode();
+        //for orbits
+        GeometryNode(   std::shared_ptr<Node> parent, 
+                        std::string const& name,
+                        float distance );
+        //for planets
         GeometryNode(   std::shared_ptr<Node> parent, 
                         std::string const& name,
                         std::shared_ptr<model> model_ptr,

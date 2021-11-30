@@ -77,16 +77,16 @@ void ApplicationSolar::renderPlanet() const {
   // using the vector to get references to the planets to render each one
 
   for (auto i : m_geo) {
-    //rotating the placeholder ni the center
+    //rotating the placeholder in the center
     auto i_parent = i->getParent();
     i_parent->setLocalTransform(glm::rotate(i_parent->getLocalTransform(), 
                                             float(0.01f * i->getRot()), 
-                                            glm::fvec3{0.0f, 0.0f, -1.0f}));
+                                            glm::fvec3{0.0f, 1.0f, 0.0f}));
     glUseProgram(m_shaders.at("planet").handle);
 
     auto model_matrix = i->getWorldTransform();
     //rotating the planet around itself
-    model_matrix = glm::rotate(model_matrix, float(i->getSpin()), glm::fvec3{0.0f, -1.0f, 0.0f});
+    model_matrix = glm::rotate(model_matrix, float(i->getSpin()), glm::fvec3{0.0f, 0.0f, 1.0f});
     
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -112,10 +112,16 @@ void ApplicationSolar::renderStars() const {
 }
 
 void ApplicationSolar::renderOrbits() const {
-  glUseProgram(m_shaders.at("orbit").handle);
-  glUniform3f(m_shaders.at("orbit").u_locs.at("in_Color"), 0.9f, 1.0f, 0.3f);
-  glBindVertexArray(orbit_object.vertex_AO);
-  glDrawArrays(orbit_object.draw_mode, 0, orbit_object.num_elements);
+  for (auto i : m_orbit) {
+
+    glUseProgram(m_shaders.at("orbit").handle);
+    auto model_matrix = i->getLocalTransform();
+    glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ModelMatrix"),
+                      1, GL_FALSE, glm::value_ptr(model_matrix));
+    glUniform3f(m_shaders.at("orbit").u_locs.at("in_Color"), 0.9f, 1.0f, 0.3f);
+    glBindVertexArray(orbit_object.vertex_AO);
+    glDrawArrays(orbit_object.draw_mode, 0, orbit_object.num_elements);
+  }
 }
 
 void ApplicationSolar::uploadView() {
@@ -129,7 +135,7 @@ void ApplicationSolar::uploadView() {
   glUniformMatrix4fv(m_shaders.at("star").u_locs.at("ModelViewMatrix"),
                      1, GL_FALSE, glm::value_ptr(view_matrix));
   glUseProgram(m_shaders.at("orbit").handle);
-  glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ModelViewMatrix"),
+  glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ViewMatrix"),
                      1, GL_FALSE, glm::value_ptr(view_matrix));
 }
 
@@ -189,6 +195,16 @@ void ApplicationSolar::uploadUniforms() {
               {std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr, 0.15f, 0.27f, 13.0f, 0.4f)},
               {std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr, 0.17f, 0.23f, 15.3f, 0.3f)} };
 
+    m_orbit = { {std::make_shared<GeometryNode>(mercury, "Mercury Orbit", 1.5f)},
+                {std::make_shared<GeometryNode>(venus, "Venus Orbit", 3.2f)},
+                {std::make_shared<GeometryNode>(earth, "Earth Orbit", 5.0f)},
+                {std::make_shared<GeometryNode>(moon, "Moon Orbit",  2.0f)},
+                {std::make_shared<GeometryNode>(mars, "Mars Orbit", 6.7f)},
+                {std::make_shared<GeometryNode>(jupiter, "Jupiter Orbit", 9.8f)},
+                {std::make_shared<GeometryNode>(saturn, "Saturn Orbit", 11.6f)},
+                {std::make_shared<GeometryNode>(uranus, "Uranus Orbit", 13.0f)},
+                {std::make_shared<GeometryNode>(neptune, "Neptune Orbit", 15.3f)} };
+
     //adding all the nodes that are children of root
     root->addChildren(camera);
     root->addChildren(sun);
@@ -213,10 +229,26 @@ void ApplicationSolar::uploadUniforms() {
     saturn->addChildren(m_geo[7]);
     uranus->addChildren(m_geo[8]);
     neptune->addChildren(m_geo[9]);
+    //orbits
+    mercury->addChildren(m_orbit[0]);
+    venus->addChildren(m_orbit[1]);
+    earth->addChildren(m_orbit[2]);
+    m_orbit[2]->addChildren(moon);
+    moon->setParent(m_orbit[2]);
+    moon->addChildren(m_orbit[3]);
+    mars->addChildren(m_orbit[4]);
+    jupiter->addChildren(m_orbit[5]);
+    saturn->addChildren(m_orbit[6]);
+    uranus->addChildren(m_orbit[7]);
+    neptune->addChildren(m_orbit[8]);
 
     for (int i = 0; i < m_geo.size(); ++i) {
-      m_geo[i]->setLocalTransform(glm::translate(m_geo[i]->getLocalTransform(), glm::fvec3{0.0f , m_geo[i]->getDist(), 0.0f}));
+      m_geo[i]->setLocalTransform(glm::translate(m_geo[i]->getLocalTransform(), glm::fvec3{m_geo[i]->getDist(), 0.0f, 0.0f}));
       m_geo[i]->setLocalTransform(glm::scale(m_geo[i]->getLocalTransform(), glm::fvec3{m_geo[i]->getSize(), m_geo[i]->getSize(), m_geo[i]->getSize()}));
+    }
+    for (int i = 0; i < m_orbit.size(); ++i) {
+      auto dist = m_orbit[i]->getDist();
+      m_orbit[i]->setLocalTransform(glm::scale(m_orbit[i]->getLocalTransform(), glm::fvec3{dist, dist, dist}));
     }
     std::cout << m_scene_graph.printGraph();
   }
@@ -310,7 +342,8 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.emplace("orbit", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/orbit.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});
                                            // request uniform locations for shader program
-  m_shaders.at("orbit").u_locs["ModelViewMatrix"] = -1;
+  m_shaders.at("orbit").u_locs["ModelMatrix"] = -1;
+  m_shaders.at("orbit").u_locs["ViewMatrix"] = -1;
   m_shaders.at("orbit").u_locs["ProjectionMatrix"] = -1;
   m_shaders.at("orbit").u_locs["in_Color"] = -1;
  
