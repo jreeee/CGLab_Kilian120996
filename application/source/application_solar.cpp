@@ -113,6 +113,7 @@ void ApplicationSolar::renderStars() const {
 
 void ApplicationSolar::renderOrbits() const {
   glUseProgram(m_shaders.at("orbit").handle);
+  glUniform3f(m_shaders.at("orbit").u_locs.at("in_Color"), 0.9f, 1.0f, 0.3f);
   glBindVertexArray(orbit_object.vertex_AO);
   glDrawArrays(orbit_object.draw_mode, 0, orbit_object.num_elements);
 }
@@ -225,13 +226,14 @@ void ApplicationSolar::initializeStars() {
   std::vector<GLfloat> stars;
 
   //only to make the loop a bit faster, as these stay constant
-  float densityh = float(STAR_DENSITY) / 2;
+  float densityh = float(STAR_DENSITY) / 2.0f;
   unsigned int brightness = 265 - STAR_BRIGHTNESS;
   
   for (int i = 0; i < STAR_COUNT; ++i) {
     //as we need three coordinate- and colour values we can add another for loop
     for (int j = 0; j < 3; ++j) {
-      stars.push_back((std::rand() % STAR_DENSITY) - densityh);
+      //the * 1000 / 1000 is to get floats that have 4 decimal places and thus are more evenly spaced out
+      stars.push_back(float(std::rand() % (STAR_DENSITY * 1000)) / 1000.0f - densityh);
     }
     for (int k = 0; k < 3; ++k) {
       //we add a randomly generated number to the base value and divide by 256 to get our value
@@ -259,24 +261,13 @@ void ApplicationSolar::initializeStars() {
 }
 
 void ApplicationSolar::initializeOrbits() {
-  std::vector<GLfloat> orbits;
+  std::vector<GLfloat> orbit_pts;
 
-  //REDO
-  
-  //only to make the loop a bit faster, as these stay constant
-  float densityh = float(STAR_DENSITY) / 2;
-  unsigned int brightness = 265 - STAR_BRIGHTNESS;
-  
-  for (int k = 0; k < 3; ++k) {
-      //we add a randomly generated number to the base value and divide by 256 to get our value
-      orbits.push_back(float((std::rand() % brightness) + STAR_BRIGHTNESS)/256);
-  }
-  for (int i = 0; i < STAR_COUNT; ++i) {
-    //as we need three coordinate- and colour values we can add another for loop
-    for (int j = 0; j < 3; ++j) {
-      orbits.push_back((std::rand() % STAR_DENSITY) - densityh);
-    }
-    
+  for (int i = 0; i < ORBIT_POINTS; ++i) {
+    float angle = 2.0f * M_PI * (float)i / ORBIT_POINTS;
+    orbit_pts.push_back(sin(angle));
+    orbit_pts.push_back(0);
+    orbit_pts.push_back(cos(angle));
   }
 
   //initialize Vertex Array
@@ -285,16 +276,18 @@ void ApplicationSolar::initializeOrbits() {
   //Buffers + Data
   glGenBuffers(GLuint(1), &orbit_object.vertex_BO);
   glBindBuffer(GL_ARRAY_BUFFER, orbit_object.vertex_BO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*orbits.size(), orbits.data(), GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*orbit_pts.size(), orbit_pts.data(), GL_STATIC_DRAW);
   //position information via attributes
   glEnableVertexArrayAttrib(orbit_object.vertex_AO, 0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0); //REDO
-  //same for color
-  glEnableVertexArrayAttrib(orbit_object.vertex_AO, 1);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void*)(sizeof(float)*3));
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, 0);
+  //generic buffer
+  glGenBuffers(1, &orbit_object.element_BO);
+  //binding
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, orbit_object.element_BO);
+  
   //setting the draw mode
   orbit_object.draw_mode = GL_LINE_LOOP; //LINE_LOOP
-  orbit_object.num_elements = STAR_COUNT;
+  orbit_object.num_elements = ORBIT_POINTS;
 }
 
 // load shader sources
@@ -319,6 +312,8 @@ void ApplicationSolar::initializeShaderPrograms() {
                                            // request uniform locations for shader program
   m_shaders.at("orbit").u_locs["ModelViewMatrix"] = -1;
   m_shaders.at("orbit").u_locs["ProjectionMatrix"] = -1;
+  m_shaders.at("orbit").u_locs["in_Color"] = -1;
+ 
 }
 
 // load models
