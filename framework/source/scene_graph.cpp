@@ -43,10 +43,19 @@ std::string SceneGraph::printGraph() {
                         + "( R | " + std::to_string(root_->getDepth()) 
                         + " ) " + root_->getName();
     graph << info;
-    for(auto i : root_->getChildrenList()){
+    for(auto i : root_->getChildrenList()) {
         // printChildrenList() will recursively print all Nodes in the SceneGraph
         i->printChildrenList(graph);
     }
     graph << std::endl;
     return graph.str();
+}
+
+std::shared_ptr<CameraNode> SceneGraph::getCamera() const {
+    //TODO recursion
+    for(auto i : root_->getChildrenList()) {
+        auto camera = std::dynamic_pointer_cast<CameraNode>(i);
+        if (camera && camera->getEnabled()) return camera;
+    }
+    return nullptr;
 }

@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 
-#include "node.hpp"
+#include "camera_node.hpp"
 
 class SceneGraph {
 
@@ -27,6 +27,7 @@ class SceneGraph {
         std::shared_ptr<Node> getRoot() const;
         void setRoot(std::shared_ptr<Node> root);
         std::string printGraph();
+        std::shared_ptr<CameraNode> getCamera() const;
 
 };
 

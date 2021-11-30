@@ -49,10 +49,6 @@ class ApplicationSolar : public Application {
   model_object star_object;
   model_object orbit_object;
   
-  // camera transform matrix
-  glm::fmat4 m_view_transform;
-  // camera projection matrix
-  glm::fmat4 m_view_projection;
   // scene graph
   SceneGraph m_scene_graph;
   std::vector<std::shared_ptr<GeometryNode>> m_geo;
