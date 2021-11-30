@@ -2,18 +2,21 @@
 
 GeometryNode::GeometryNode():
     Node(), 
-    model_ {nullptr} {
+    model_ {nullptr},
+    color_ {nullptr} {
 }
 
 GeometryNode::GeometryNode( std::shared_ptr<Node> parent,
                             std::string const& name,
-                            float distance ):
+                            float distance,
+                            std::shared_ptr<Color> color ):
     Node(parent, name),
     model_ {nullptr},
     spin_ {0.0f},
     rotation_ {0.0f},
     distance_ {distance},
-    size_ {1.0f} {
+    size_ {1.0f},
+    color_ {color} {
 }
 
 GeometryNode::GeometryNode( std::shared_ptr<Node> parent,
@@ -22,17 +25,20 @@ GeometryNode::GeometryNode( std::shared_ptr<Node> parent,
                             float spin,
                             float rotation,
                             float distance,
-                            float size ):
+                            float size,
+                            std::shared_ptr<Color> color ):
     Node(parent, name),
     model_ {model_ptr},
     spin_ {spin},
     rotation_ {rotation},
     distance_ {distance},
-    size_ {size} {
+    size_ {size},
+    color_ {color} {
 }
 
 GeometryNode::~GeometryNode() {
     model_ = nullptr;
+    color_ = nullptr;
 }
 
 std::shared_ptr<model> GeometryNode::getModel() const {
@@ -64,4 +70,12 @@ float GeometryNode::getDist() const {
 
 float GeometryNode::getSize() const {
     return size_;
+}
+
+std::shared_ptr<Color> GeometryNode::getColor() const {
+    return color_;
+}
+
+void GeometryNode::setColor(std::shared_ptr<Color> color) {
+    color_ = color;
 }

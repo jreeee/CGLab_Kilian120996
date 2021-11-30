@@ -122,7 +122,7 @@ void ApplicationSolar::renderOrbits() const {
     }
     glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
-    glUniform3f(m_shaders.at("orbit").u_locs.at("in_Color"), 0.9f, 1.0f, 0.3f);
+    glUniform3f(m_shaders.at("orbit").u_locs.at("in_Color"), i->getColor()->r, i->getColor()->g, i->getColor()->b);
     glBindVertexArray(orbit_object.vertex_AO);
     glDrawArrays(orbit_object.draw_mode, 0, orbit_object.num_elements);
   }
@@ -167,6 +167,17 @@ void ApplicationSolar::uploadUniforms() {
   //build ScreenGraph
   void ApplicationSolar::initializeScreenGraph() {
 
+    std::vector<std::shared_ptr<Color>> cols  = { {std::make_shared<Color>(1.0f, 1.0f, 1.0f)},
+                                                  {std::make_shared<Color>(0.5f, 0.5f, 0.5f)},
+                                                  {std::make_shared<Color>(0.1f, 0.1f, 0.1f)},
+                                                  {std::make_shared<Color>(0.3f, 0.8f, 0.2f)},
+                                                  {std::make_shared<Color>(0.2f, 0.4f, 0.6f)},
+                                                  {std::make_shared<Color>(0.9f, 0.3f, 0.4f)},
+                                                  {std::make_shared<Color>(0.5f, 0.8f, 0.8f)},
+                                                  {std::make_shared<Color>(0.9f, 0.5f, 0.1f)},
+                                                  {std::make_shared<Color>(0.8f, 0.2f, 0.7f)},
+                                                  {std::make_shared<Color>(0.2f, 0.5f, 0.9f)} };
+
     auto mdl_ptr = std::make_shared<model>();
     //creation of the root node and the SceneGraph
     auto root = std::make_shared<Node>(nullptr, "Root");
@@ -188,27 +199,27 @@ void ApplicationSolar::uploadUniforms() {
     auto neptune = std::make_shared<Node>(root, "Neptune");
 
     //storing pointers to the geo vector while initializing the geo nodes
-    m_geo = { {std::make_shared<GeometryNode>(sun, "Sun Geometry", mdl_ptr, 0.0f, 1.0f, 0.0f, 1.0f)},
-              {std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr, 0.2f, 0.3f, 1.5f, 0.35f)},
-              {std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr, 0.3f, 0.1f, 3.2f, 0.4f)},
-              {std::make_shared<GeometryNode>(earth, "Earth Geometry", mdl_ptr, 0.25f, 0.4f, 5.0f, 0.5f)},
-              {std::make_shared<GeometryNode>(moon, "Moon Geometry", mdl_ptr, 0.4f, 0.23f, 2.0f, 0.5f)},
-              {std::make_shared<GeometryNode>(mars, "Mars Geometry", mdl_ptr, 0.32f, 0.14f, 6.7f, 0.35f)},
-              {std::make_shared<GeometryNode>(jupiter, "Jupiter Geometry", mdl_ptr, 0.13f, 0.26f, 9.8f, 0.7f)},
-              {std::make_shared<GeometryNode>(saturn, "Saturn Geometry", mdl_ptr, 0.06f, 0.31f, 11.6f, 0.6f)},
-              {std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr, 0.15f, 0.27f, 13.0f, 0.4f)},
-              {std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr, 0.17f, 0.23f, 15.3f, 0.3f)} };
+    m_geo = { {std::make_shared<GeometryNode>(sun, "Sun Geometry", mdl_ptr, 0.0f, 1.0f, 0.0f, 1.0f, cols[0])},
+              {std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr, 0.2f, 0.3f, 1.5f, 0.35f, cols[4])},
+              {std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr, 0.3f, 0.1f, 3.2f, 0.4f, cols[5])},
+              {std::make_shared<GeometryNode>(earth, "Earth Geometry", mdl_ptr, 0.25f, 0.4f, 5.0f, 0.5f, cols[9])},
+              {std::make_shared<GeometryNode>(moon, "Moon Geometry", mdl_ptr, 0.4f, 0.23f, 2.0f, 0.5f, cols[1])},
+              {std::make_shared<GeometryNode>(mars, "Mars Geometry", mdl_ptr, 0.32f, 0.14f, 6.7f, 0.35f, cols[6])},
+              {std::make_shared<GeometryNode>(jupiter, "Jupiter Geometry", mdl_ptr, 0.13f, 0.26f, 9.8f, 0.7f, cols[7])},
+              {std::make_shared<GeometryNode>(saturn, "Saturn Geometry", mdl_ptr, 0.06f, 0.31f, 11.6f, 0.6f, cols[8])},
+              {std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr, 0.15f, 0.27f, 13.0f, 0.4f, cols[5])},
+              {std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr, 0.17f, 0.23f, 15.3f, 0.3f, cols[7])} };
 
-    m_orbit = { {std::make_shared<GeometryNode>(mercury, "Mercury Orbit", 1.5f)},
-                {std::make_shared<GeometryNode>(venus, "Venus Orbit", 3.2f)},
-                {std::make_shared<GeometryNode>(earth, "Earth Orbit", 5.0f)},
+    m_orbit = { {std::make_shared<GeometryNode>(mercury, "Mercury Orbit", 1.5f, cols[4])},
+                {std::make_shared<GeometryNode>(venus, "Venus Orbit", 3.2f, cols[5])},
+                {std::make_shared<GeometryNode>(earth, "Earth Orbit", 5.0f, cols[9])},
                 //initializing with negative spin and rotation to cancel out the planet holder
-                {std::make_shared<GeometryNode>(moon, "Moon Orbit", mdl_ptr, -0.4f, -0.23f, 2.0f, 1.0f)},
-                {std::make_shared<GeometryNode>(mars, "Mars Orbit", 6.7f)},
-                {std::make_shared<GeometryNode>(jupiter, "Jupiter Orbit", 9.8f)},
-                {std::make_shared<GeometryNode>(saturn, "Saturn Orbit", 11.6f)},
-                {std::make_shared<GeometryNode>(uranus, "Uranus Orbit", 13.0f)},
-                {std::make_shared<GeometryNode>(neptune, "Neptune Orbit", 15.3f)} };
+                {std::make_shared<GeometryNode>(moon, "Moon Orbit", mdl_ptr, -0.4f, -0.23f, 2.0f, 1.0f, cols[1])},
+                {std::make_shared<GeometryNode>(mars, "Mars Orbit", 6.7f, cols[6])},
+                {std::make_shared<GeometryNode>(jupiter, "Jupiter Orbit", 9.8f, cols[7])},
+                {std::make_shared<GeometryNode>(saturn, "Saturn Orbit", 11.6f, cols[8])},
+                {std::make_shared<GeometryNode>(uranus, "Uranus Orbit", 13.0f, cols[5])},
+                {std::make_shared<GeometryNode>(neptune, "Neptune Orbit", 15.3f, cols[7])} };
 
     //adding all the nodes that are children of root
     root->addChildren(camera);

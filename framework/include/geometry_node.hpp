@@ -3,6 +3,7 @@
 
 #include "node.hpp"
 #include "model.hpp"
+#include "structs.hpp"
 
 class GeometryNode : public Node {
     
@@ -15,6 +16,7 @@ class GeometryNode : public Node {
         float rotation_;
         float distance_;
         float size_;
+        std::shared_ptr<Color> color_;
 
     public:
 
@@ -23,7 +25,8 @@ class GeometryNode : public Node {
         //for orbits
         GeometryNode(   std::shared_ptr<Node> parent, 
                         std::string const& name,
-                        float distance );
+                        float distance,
+                        std::shared_ptr<Color> color );
         //for planets
         GeometryNode(   std::shared_ptr<Node> parent, 
                         std::string const& name,
@@ -31,7 +34,8 @@ class GeometryNode : public Node {
                         float spin,
                         float rotation,
                         float distance,
-                        float size );
+                        float size,
+                        std::shared_ptr<Color> color );
         ~GeometryNode();
 
         // methods
@@ -43,6 +47,9 @@ class GeometryNode : public Node {
         float getRot() const;
         float getDist() const;
         float getSize() const;
+        std::shared_ptr<Color> getColor() const;
+        void setColor(std::shared_ptr<Color> color);
+
 };
 
 #endif
