@@ -30,7 +30,7 @@ using namespace gl;
 const unsigned int STAR_COUNT = 100000;
 const unsigned int STAR_DENSITY = 150;
 const unsigned int STAR_BRIGHTNESS = 100;
-const unsigned int ORBIT_POINTS = 50;
+const unsigned int ORBIT_POINTS = 100;
 
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
@@ -86,7 +86,7 @@ void ApplicationSolar::renderPlanet() const {
 
     auto model_matrix = i->getWorldTransform();
     //rotating the planet around itself
-    model_matrix = glm::rotate(model_matrix, float(i->getSpin()), glm::fvec3{0.0f, 0.0f, 1.0f});
+    model_matrix = glm::rotate(model_matrix, float(i->getSpin()), glm::fvec3{0.0f, 1.0f, 0.0f});
     
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -113,9 +113,13 @@ void ApplicationSolar::renderStars() const {
 
 void ApplicationSolar::renderOrbits() const {
   for (auto i : m_orbit) {
-
     glUseProgram(m_shaders.at("orbit").handle);
     auto model_matrix = i->getLocalTransform();
+    if (i->getName() == "Moon Orbit") {
+      model_matrix = i->getWorldTransform();
+      //cancelling out the rotation of the orbit
+      i->setLocalTransform(glm::rotate(i->getLocalTransform(), float(0.01f * i->getRot() + i->getSpin()), glm::fvec3{0.0f, 1.0f, 0.0f}));
+    }
     glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
     glUniform3f(m_shaders.at("orbit").u_locs.at("in_Color"), 0.9f, 1.0f, 0.3f);
@@ -198,7 +202,8 @@ void ApplicationSolar::uploadUniforms() {
     m_orbit = { {std::make_shared<GeometryNode>(mercury, "Mercury Orbit", 1.5f)},
                 {std::make_shared<GeometryNode>(venus, "Venus Orbit", 3.2f)},
                 {std::make_shared<GeometryNode>(earth, "Earth Orbit", 5.0f)},
-                {std::make_shared<GeometryNode>(moon, "Moon Orbit",  2.0f)},
+                //initializing with negative spin and rotation to cancel out the planet holder
+                {std::make_shared<GeometryNode>(moon, "Moon Orbit", mdl_ptr, -0.4f, -0.23f, 2.0f, 1.0f)},
                 {std::make_shared<GeometryNode>(mars, "Mars Orbit", 6.7f)},
                 {std::make_shared<GeometryNode>(jupiter, "Jupiter Orbit", 9.8f)},
                 {std::make_shared<GeometryNode>(saturn, "Saturn Orbit", 11.6f)},
@@ -234,7 +239,6 @@ void ApplicationSolar::uploadUniforms() {
     venus->addChildren(m_orbit[1]);
     earth->addChildren(m_orbit[2]);
     m_orbit[2]->addChildren(moon);
-    moon->setParent(m_orbit[2]);
     moon->addChildren(m_orbit[3]);
     mars->addChildren(m_orbit[4]);
     jupiter->addChildren(m_orbit[5]);
