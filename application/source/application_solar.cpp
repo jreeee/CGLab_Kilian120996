@@ -43,6 +43,10 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,m_scene_graph {}
 {
   initializeScreenGraph();
+
+  //set the camera 
+
+
   initializeGeometry();
   initializeStars();
   initializeOrbits();
@@ -160,7 +164,7 @@ void ApplicationSolar::uploadUniforms() {
     m_scene_graph = SceneGraph("Solar System Scene Graph", root);
 
     //adding all the planet nodes
-    auto sun = std::make_shared<PointLightNode>(root, "PointLight", 100.0f);
+    auto sun = std::make_shared<PointLightNode>(root, "PointLight", 0.7f ,100.0f);
     auto mercury = std::make_shared<Node>(root, "Mercury");
     auto venus = std::make_shared<Node>(root, "Venus");
     auto earth = std::make_shared<Node>(root, "Earth");
