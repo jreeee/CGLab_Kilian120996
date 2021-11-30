@@ -164,7 +164,8 @@ void ApplicationSolar::uploadUniforms() {
     m_scene_graph = SceneGraph("Solar System Scene Graph", root);
 
     //adding all the planet nodes
-    auto sun = std::make_shared<PointLightNode>(root, "PointLight", 0.7f ,100.0f);
+    Color sun_color = {0.9f, 1.0f, 0.3f};
+    auto sun = std::make_shared<PointLightNode>(root, "PointLight", sun_color ,100.0f);
     auto mercury = std::make_shared<Node>(root, "Mercury");
     auto venus = std::make_shared<Node>(root, "Venus");
     auto earth = std::make_shared<Node>(root, "Earth");
