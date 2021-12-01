@@ -7,6 +7,8 @@
 #include <glm/glm.hpp>
 #include <sstream>
 
+#include "node.hpp"
+
 class Node {
 
     protected:
