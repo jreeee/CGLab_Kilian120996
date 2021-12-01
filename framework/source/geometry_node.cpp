@@ -3,20 +3,20 @@
 GeometryNode::GeometryNode():
     Node(), 
     model_ {nullptr},
-    color_ {nullptr} {
+    material_ {nullptr} {
 }
 
 GeometryNode::GeometryNode( std::shared_ptr<Node> parent,
                             std::string const& name,
                             float distance,
-                            std::shared_ptr<Color> color ):
+                            std::shared_ptr<Material> material ):
     Node(parent, name),
     model_ {nullptr},
     spin_ {0.0f},
     rotation_ {0.0f},
     distance_ {distance},
     size_ {1.0f},
-    color_ {color} {
+    material_ {material} {
 }
 
 GeometryNode::GeometryNode( std::shared_ptr<Node> parent,
@@ -26,19 +26,19 @@ GeometryNode::GeometryNode( std::shared_ptr<Node> parent,
                             float rotation,
                             float distance,
                             float size,
-                            std::shared_ptr<Color> color ):
+                            std::shared_ptr<Material> material ):
     Node(parent, name),
     model_ {model_ptr},
     spin_ {spin},
     rotation_ {rotation},
     distance_ {distance},
     size_ {size},
-    color_ {color} {
+    material_ {material} {
 }
 
 GeometryNode::~GeometryNode() {
     model_ = nullptr;
-    color_ = nullptr;
+    material_= nullptr;
 }
 
 std::shared_ptr<model> GeometryNode::getModel() const {
@@ -72,10 +72,10 @@ float GeometryNode::getSize() const {
     return size_;
 }
 
-std::shared_ptr<Color> GeometryNode::getColor() const {
-    return color_;
+std::shared_ptr<Material> GeometryNode::getMaterial() const {
+    return material_;
 }
 
-void GeometryNode::setColor(std::shared_ptr<Color> color) {
-    color_ = color;
+void GeometryNode::setMaterial(std::shared_ptr<Material> material) {
+    material_ = material;
 }

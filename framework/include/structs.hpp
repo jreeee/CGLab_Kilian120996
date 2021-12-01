@@ -1,6 +1,7 @@
 #ifndef STRUCTS_HPP
 #define STRUCTS_HPP
 
+#include <memory>
 #include <map>
 #include <glbinding/gl/gl.h>
 // use gl definitions from glbinding 
@@ -47,6 +48,13 @@ struct Color {
   float r = 0.5f;
   float g = 0.5f;
   float b = 0.3f;
+};
+
+struct Material {
+  std::shared_ptr<Color> diffuse = std::make_shared<Color>(0.5f, 0.5f, 0.5f);
+  std::shared_ptr<Color> specular = std::make_shared<Color>(1.0f, 1.0f, 1.0f);
+  float alpha;
+  float roughness;
 };
 
 #endif

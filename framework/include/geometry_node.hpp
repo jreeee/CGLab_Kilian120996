@@ -16,7 +16,7 @@ class GeometryNode : public Node {
         float rotation_;
         float distance_;
         float size_;
-        std::shared_ptr<Color> color_;
+        std::shared_ptr<Material> material_;
 
     public:
 
@@ -26,7 +26,7 @@ class GeometryNode : public Node {
         GeometryNode(   std::shared_ptr<Node> parent, 
                         std::string const& name,
                         float distance,
-                        std::shared_ptr<Color> color );
+                        std::shared_ptr<Material> material );
         //for planets
         GeometryNode(   std::shared_ptr<Node> parent, 
                         std::string const& name,
@@ -35,7 +35,7 @@ class GeometryNode : public Node {
                         float rotation,
                         float distance,
                         float size,
-                        std::shared_ptr<Color> color );
+                        std::shared_ptr<Material> material );
         ~GeometryNode();
 
         // methods
@@ -47,8 +47,8 @@ class GeometryNode : public Node {
         float getRot() const;
         float getDist() const;
         float getSize() const;
-        std::shared_ptr<Color> getColor() const;
-        void setColor(std::shared_ptr<Color> color);
+        std::shared_ptr<Material> getMaterial() const;
+        void setMaterial(std::shared_ptr<Material> material);
 
 };
 
