@@ -109,7 +109,7 @@ void ApplicationSolar::renderPlanet() const {
     glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), ambient->getIntensity());
     glUniform3f(m_shaders.at("planet").u_locs.at("LightColor"), light->getLightColor().r, light->getLightColor().g, light->getLightColor().b);
     glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light->getIntensity());
-    glm::vec4 l_pos = light->getWorldTransform() * ORIGIN;
+    glm::vec3 l_pos(light->getWorldTransform() * ORIGIN);
     glUniform3fv(m_shaders.at("planet").u_locs.at("LightPosition"), 1, glm::value_ptr(l_pos));
 
     // bind the VAO to draw
@@ -207,7 +207,7 @@ void ApplicationSolar::uploadUniforms() {
     //adding all the planet nodes
     Color sun_color = {0.9f, 1.0f, 0.3f};
     Color ambient_color = {1.0f, 1.0f, 1.0f};
-    auto sun = std::make_shared<PointLightNode>(root, "PointLight", sun_color, 1.0f);
+    auto sun = std::make_shared<PointLightNode>(root, "PointLight", sun_color, 100.0f);
     auto ambient =std::make_shared<PointLightNode>(root, "AmbientLight", ambient_color, 0.05f);
     auto mercury = std::make_shared<Node>(root, "Mercury");
     auto venus = std::make_shared<Node>(root, "Venus");

@@ -14,7 +14,7 @@ uniform vec3  PlanetColor;
 
 void main() {
   //beta(Y,X) = (lcol *lint)/(4PI (Y-X)^2)
-  vec3 beta = (LightColor * LightIntensity) / (4 * PI * pow(length(LightPosition - Position), 2));
+  vec3 beta = (LightColor * LightIntensity) / (4 * PI * pow(length(LightPosition - Position), 2.0f));
   vec3 ambient = AmbientIntensity * AmbientColor;
   vec3 light = LightColor * LightIntensity;
   out_Color = vec4(ambient + beta * PlanetColor, 1.0);
