@@ -100,9 +100,9 @@ void ApplicationSolar::renderPlanet() const {
                       1, GL_FALSE, glm::value_ptr(model_matrix));
 
     // extra matrix for normal transformation to keep them orthogonal to surface
-    glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_scene_graph.getCamera()->getLocalTransform() * model_matrix));
-    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
-                      1, GL_FALSE, glm::value_ptr(normal_matrix));
+    // glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_scene_graph.getCamera()->getLocalTransform() * model_matrix));
+    // glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
+    //                  1, GL_FALSE, glm::value_ptr(normal_matrix));
     auto mat = i->getMaterial();
     glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), mat->diffuse->r, mat->diffuse->g, mat->diffuse->b);
     glUniform3f(m_shaders.at("planet").u_locs.at("AmbientColor"), ambient->getLightColor().r, ambient->getLightColor().g, ambient->getLightColor().b);
@@ -220,10 +220,10 @@ void ApplicationSolar::uploadUniforms() {
     m_scene_graph = SceneGraph("Solar System Scene Graph", root);
 
     //adding all the planet nodes
-    Color sun_color = {0.9f, 1.0f, 0.3f};
+    Color sun_color = {0.7f, 1.0f, 0.3f};
     Color ambient_color = {1.0f, 1.0f, 1.0f};
-    auto sun = std::make_shared<PointLightNode>(root, "PointLight", sun_color, 100.0f);
-    auto ambient =std::make_shared<PointLightNode>(root, "AmbientLight", ambient_color, 0.05f);
+    auto sun = std::make_shared<PointLightNode>(root, "PointLight", sun_color, 5.0f);
+    auto ambient =std::make_shared<PointLightNode>(root, "AmbientLight", ambient_color, 0.5f);
     auto mercury = std::make_shared<Node>(root, "Mercury");
     auto venus = std::make_shared<Node>(root, "Venus");
     auto earth = std::make_shared<Node>(root, "Earth");
@@ -380,7 +380,7 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.emplace("planet", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/simple.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/simple.frag"}}});
   // request uniform locations for shader program
-  m_shaders.at("planet").u_locs["NormalMatrix"] = -1;
+  //m_shaders.at("planet").u_locs["NormalMatrix"] = -1; calculated in the shader
   m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
   m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
   m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;
@@ -413,7 +413,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 
 // load models
 void ApplicationSolar::initializeGeometry() {
-  model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
+  model planet_model = model_loader::obj(m_resource_path + "models/soc.obj", model::NORMAL);
 
   // generate vertex array object
   glGenVertexArrays(1, &planet_object.vertex_AO);
