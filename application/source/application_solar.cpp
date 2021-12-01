@@ -32,6 +32,7 @@ const unsigned int STAR_DENSITY = 150;
 const unsigned int STAR_BRIGHTNESS = 100;
 const unsigned int ORBIT_POINTS = 100;
 const glm::fvec4 ORIGIN = {0.0f, 0.0f, 0.0f, 1.0f};
+const float SUN_BRIGHTNESS = 30.0f;
 
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
@@ -98,15 +99,19 @@ void ApplicationSolar::renderPlanet() const {
     
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
-
     // extra matrix for normal transformation to keep them orthogonal to surface
     // glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_scene_graph.getCamera()->getLocalTransform() * model_matrix));
     // glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
     //                  1, GL_FALSE, glm::value_ptr(normal_matrix));
     auto mat = i->getMaterial();
+    if (i->getName() == "Sun Geometry") {
+      glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), ambient->getIntensity() * SUN_BRIGHTNESS);
+    }
+    else {
+      glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), ambient->getIntensity());
+    }
     glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), mat->diffuse->r, mat->diffuse->g, mat->diffuse->b);
     glUniform3f(m_shaders.at("planet").u_locs.at("AmbientColor"), ambient->getLightColor().r, ambient->getLightColor().g, ambient->getLightColor().b);
-    glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), ambient->getIntensity());
     glUniform3f(m_shaders.at("planet").u_locs.at("LightColor"), light->getLightColor().r, light->getLightColor().g, light->getLightColor().b);
     glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light->getIntensity());
     glm::vec3 l_pos(light->getWorldTransform() * ORIGIN);
@@ -203,16 +208,16 @@ void ApplicationSolar::uploadUniforms() {
                                                   {std::make_shared<Color>(0.9f, 0.5f, 0.1f)},
                                                   {std::make_shared<Color>(0.8f, 0.2f, 0.7f)},
                                                   {std::make_shared<Color>(0.2f, 0.5f, 0.9f)} };
-    std::vector<std::shared_ptr<Material>> mats  = {{std::make_shared<Material>(cols[0], spec, 25.0f, 40.0f)},
-                                                    {std::make_shared<Material>(cols[1], spec, 25.0f, 40.0f)},
-                                                    {std::make_shared<Material>(cols[2], spec, 25.0f, 40.0f)},
-                                                    {std::make_shared<Material>(cols[3], spec, 25.0f, 40.0f)},
-                                                    {std::make_shared<Material>(cols[4], spec, 25.0f, 40.0f)},
-                                                    {std::make_shared<Material>(cols[5], spec, 25.0f, 40.0f)},
-                                                    {std::make_shared<Material>(cols[6], spec, 25.0f, 40.0f)},
-                                                    {std::make_shared<Material>(cols[7], spec, 25.0f, 40.0f)},
-                                                    {std::make_shared<Material>(cols[8], spec, 25.0f, 40.0f)},
-                                                    {std::make_shared<Material>(cols[9], spec, 25.0f, 40.0f)} };
+    std::vector<std::shared_ptr<Material>> mats  = {{std::make_shared<Material>(cols[0], spec, 25.0f, 5.0f)},
+                                                    {std::make_shared<Material>(cols[1], spec, 25.0f, 5.0f)},
+                                                    {std::make_shared<Material>(cols[2], spec, 25.0f, 5.0f)},
+                                                    {std::make_shared<Material>(cols[3], spec, 25.0f, 5.0f)},
+                                                    {std::make_shared<Material>(cols[4], spec, 25.0f, 5.0f)},
+                                                    {std::make_shared<Material>(cols[5], spec, 25.0f, 5.0f)},
+                                                    {std::make_shared<Material>(cols[6], spec, 25.0f, 5.0f)},
+                                                    {std::make_shared<Material>(cols[7], spec, 25.0f, 5.0f)},
+                                                    {std::make_shared<Material>(cols[8], spec, 25.0f, 5.0f)},
+                                                    {std::make_shared<Material>(cols[9], spec, 25.0f, 5.0f)} };
 
     auto mdl_ptr = std::make_shared<model>();
     //creation of the root node and the SceneGraph
@@ -222,10 +227,10 @@ void ApplicationSolar::uploadUniforms() {
     m_scene_graph = SceneGraph("Solar System Scene Graph", root);
 
     //adding all the planet nodes
-    Color sun_color = {0.7f, 1.0f, 0.3f};
+    Color sun_color = {0.1f, 0.5f, 0.3f};
     Color ambient_color = {1.0f, 1.0f, 1.0f};
-    auto sun = std::make_shared<PointLightNode>(root, "PointLight", sun_color, 5.0f);
-    auto ambient =std::make_shared<PointLightNode>(root, "AmbientLight", ambient_color, 0.5f);
+    auto sun = std::make_shared<PointLightNode>(root, "PointLight", sun_color, SUN_BRIGHTNESS);
+    auto ambient =std::make_shared<PointLightNode>(root, "AmbientLight", ambient_color, 0.2f);
     auto mercury = std::make_shared<Node>(root, "Mercury");
     auto venus = std::make_shared<Node>(root, "Venus");
     auto earth = std::make_shared<Node>(root, "Earth");

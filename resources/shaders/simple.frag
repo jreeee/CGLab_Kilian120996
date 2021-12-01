@@ -21,7 +21,7 @@ void main() {
   //ambient
   //beta(Y,X) = (lcol *lint)/(4PI (Y-X)^2)
   vec3 beta = (LightColor * LightIntensity) / 
-              (4 * PI * pow(length(LightPosition - Position), 2.0f));
+              (4.0f * PI * pow(length(LightPosition - Position), 2.0f));
   vec3 ambient = AmbientIntensity * AmbientColor;
 
   //diffuse
@@ -31,8 +31,9 @@ void main() {
   vec3 l = normalize(LightPosition - Position);
   vec3 v = normalize(CameraPosition - Position);
   vec3 h = (l + v) / (length(l+v));
-  vec3 specular = PlanetSpecular * pow(max(dot(h, v), 0), 4 * PlanetAlpha);
-  //vec3 light = LightColor * LightIntensity;
-  //out_Color = vec4(ambient + beta * (diffuse + specular) , 1.0);
-  out_Color = vec4(specular, 1.0f);
+  vec3 specular = PlanetSpecular * pow(max(dot(h, normalize(pass_Normal)), 0.0f), 4 * PlanetAlpha);
+  out_Color = vec4(ambient + beta * (diffuse + specular) , 1.0f);
+  //out_Color = vec4(ambient + beta * diffuse , 1.0f);
+  //out_Color = vec4(specular, 1.0f);
+  //out_Color = vec4(diffuse, 1.0f);
 }
