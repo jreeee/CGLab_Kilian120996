@@ -186,6 +186,8 @@ void ApplicationSolar::uploadUniforms() {
 ///////////////////////////// intialisation functions /////////////////////////
   //build ScreenGraph
   void ApplicationSolar::initializeScreenGraph() {
+    // loop with rand values?
+    //Colors and Materials that are used by the GeoNodes
     auto spec = std::make_shared<Color>(1.0f, 1.0f, 1.0f);
     std::vector<std::shared_ptr<Color>> cols = {{std::make_shared<Color>(1.0f, 1.0f, 1.0f)},
                                                   {std::make_shared<Color>(0.5f, 0.5f, 0.5f)},
