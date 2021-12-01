@@ -187,7 +187,7 @@ void ApplicationSolar::uploadUniforms() {
   //build ScreenGraph
   void ApplicationSolar::initializeScreenGraph() {
     auto spec = std::make_shared<Color>(1.0f, 1.0f, 1.0f);
-    std::vector<std::shared_ptr<Material>> cols = {{std::make_shared<Color>(1.0f, 1.0f, 1.0f)},
+    std::vector<std::shared_ptr<Color>> cols = {{std::make_shared<Color>(1.0f, 1.0f, 1.0f)},
                                                   {std::make_shared<Color>(0.5f, 0.5f, 0.5f)},
                                                   {std::make_shared<Color>(0.1f, 0.1f, 0.1f)},
                                                   {std::make_shared<Color>(0.3f, 0.8f, 0.2f)},
@@ -197,16 +197,16 @@ void ApplicationSolar::uploadUniforms() {
                                                   {std::make_shared<Color>(0.9f, 0.5f, 0.1f)},
                                                   {std::make_shared<Color>(0.8f, 0.2f, 0.7f)},
                                                   {std::make_shared<Color>(0.2f, 0.5f, 0.9f)} };
-    std::vector<std::shared_ptr<Material>> mats  = {{cols[0], spec, 25.0f, 10.0f},
-                                                    {cols[1], spec, 25.0f, 10.0f},
-                                                    {cols[2], spec, 25.0f, 10.0f},
-                                                    {cols[3], spec, 25.0f, 10.0f},
-                                                    {cols[4], spec, 25.0f, 10.0f},
-                                                    {cols[5], spec, 25.0f, 10.0f},
-                                                    {cols[6], spec, 25.0f, 10.0f},
-                                                    {cols[7], spec, 25.0f, 10.0f},
-                                                    {cols[8], spec, 25.0f, 10.0f},
-                                                    {cols[9], spec, 25.0f, 10.0f} };
+    std::vector<std::shared_ptr<Material>> mats  = {{std::make_shared<Material>(cols[0], spec, 25.0f, 10.0f)},
+                                                    {std::make_shared<Material>(cols[1], spec, 25.0f, 10.0f)},
+                                                    {std::make_shared<Material>(cols[2], spec, 25.0f, 10.0f)},
+                                                    {std::make_shared<Material>(cols[3], spec, 25.0f, 10.0f)},
+                                                    {std::make_shared<Material>(cols[4], spec, 25.0f, 10.0f)},
+                                                    {std::make_shared<Material>(cols[5], spec, 25.0f, 10.0f)},
+                                                    {std::make_shared<Material>(cols[6], spec, 25.0f, 10.0f)},
+                                                    {std::make_shared<Material>(cols[7], spec, 25.0f, 10.0f)},
+                                                    {std::make_shared<Material>(cols[8], spec, 25.0f, 10.0f)},
+                                                    {std::make_shared<Material>(cols[9], spec, 25.0f, 10.0f)} };
 
     auto mdl_ptr = std::make_shared<model>();
     //creation of the root node and the SceneGraph
