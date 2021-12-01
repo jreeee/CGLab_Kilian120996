@@ -37,13 +37,13 @@ void main() {
   vec3 h = (l + v) / (length(l+v));
   vec3 specular = PlanetSpecular * pow(max(dot(h, normalize(pass_Normal)), 0.0f), 4 * PlanetAlpha);
   vec4 phong = vec4(ambient + beta * (diffuse + specular) , 1.0f);
-  // if (Cel) {
-  phong = ceil(phong * steps)/15;
-  if (dot(v, normalize(pass_Normal)) < 0.4) {
-    //outline that is a bit darker than the planet color
-    phong = vec4(PlanetColor, 1.0) - 0.3f;
+  if (Cel) {
+    phong = ceil(phong * steps)/steps;
+    if (dot(v, normalize(pass_Normal)) < 0.4) {
+      //outline that is a bit darker than the planet color
+      phong = vec4(PlanetColor, 1.0) - 0.3f;
+    }
   }
-  // }
   out_Color = phong;
   //out_Color = vec4(ambient + beta * diffuse , 1.0f);
   //out_Color = vec4(specular, 1.0f);

@@ -401,6 +401,7 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["PlanetRoughness"] = -1;
   m_shaders.at("planet").u_locs["LightPosition"] = -1;
   m_shaders.at("planet").u_locs["CameraPosition"] = -1;
+  m_shaders.at("planet").u_locs["Cel"] = -1;
 
 
   m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
@@ -475,6 +476,14 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
   }
   else if (key == GLFW_KEY_SPACE  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     camera_node->setLocalTransform(glm::translate(camera_node->getLocalTransform(), glm::fvec3{0.0f, 0.1f, 0.0f}));
+  }
+  else if (key == GLFW_KEY_2) {
+    glUseProgram(m_shaders.at("planet").handle);
+    glUniform1b(m_shaders.at("planet").u_locs.at("Cel"), true);
+  }
+  else if (key == GLFW_KEY_1) {
+    glUseProgram(m_shaders.at("planet").handle);
+    glUniform1b(m_shaders.at("planet").u_locs.at("Cel"), false);
   }
   //interestingly you can't use L-shift like the other keys, likely having to to with the modifier-properties it has
   else if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
