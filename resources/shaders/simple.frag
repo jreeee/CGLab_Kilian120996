@@ -1,17 +1,21 @@
 #version 150
 #define PI 3.14159265359
 
+in  vec3 Position;
 in  vec3 pass_Normal;
 out vec4 out_Color;
 
-uniform vec3 l_color;
-uniform float l_intensity;
-uniform vec3 a_color;
-uniform float a_intensity;
-uniform vec3 p_color;
+uniform vec3  LightPosition;
+uniform vec3  LightColor;
+uniform float LightIntensity;
+uniform vec3  AmbientColor;
+uniform float AmbientIntensity;
+uniform vec3  PlanetColor;
 
 void main() {
-  vec3 ambient = a_intensity * a_color;
-  vec3 light = l_color * l_intensity;
-  out_Color = vec4(ambient + light * p_color, 1.0);
+  //beta(Y,X) = (lcol *lint)/(4PI (Y-X)^2)
+  vec3 beta = (LightColor * LightIntensity) / (4 * PI * pow(length(LightPosition - Position), 2));
+  vec3 ambient = AmbientIntensity * AmbientColor;
+  vec3 light = LightColor * LightIntensity;
+  out_Color = vec4(ambient + beta * PlanetColor, 1.0);
 }
