@@ -111,9 +111,11 @@ void ApplicationSolar::renderPlanet() const {
     glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light->getIntensity());
     glm::vec3 l_pos(light->getWorldTransform() * ORIGIN);
     glUniform3fv(m_shaders.at("planet").u_locs.at("LightPosition"), 1, glm::value_ptr(l_pos));
+    glm::vec3 c_pos(m_scene_graph.getCamera()->getWorldTransform() * ORIGIN);
+    glUniform3fv(m_shaders.at("planet").u_locs.at("CameraPosition"), 1, glm::value_ptr(c_pos));
     glUniform3f(m_shaders.at("planet").u_locs.at("PlanetSpecular"), mat->specular->r, mat->specular->g, mat->specular->b);
-    glUniform1f(m_shaders.at("planet").u_locs.at("PlanetAlpha"), mat->roughness);
-    glUniform1f(m_shaders.at("planet").u_locs.at("PlanetRoughness"), mat->alpha);
+    glUniform1f(m_shaders.at("planet").u_locs.at("PlanetAlpha"), mat->alpha);
+    glUniform1f(m_shaders.at("planet").u_locs.at("PlanetRoughness"), mat->roughness);
     // bind the VAO to draw
     glBindVertexArray(planet_object.vertex_AO);
 
@@ -201,16 +203,16 @@ void ApplicationSolar::uploadUniforms() {
                                                   {std::make_shared<Color>(0.9f, 0.5f, 0.1f)},
                                                   {std::make_shared<Color>(0.8f, 0.2f, 0.7f)},
                                                   {std::make_shared<Color>(0.2f, 0.5f, 0.9f)} };
-    std::vector<std::shared_ptr<Material>> mats  = {{std::make_shared<Material>(cols[0], spec, 25.0f, 10.0f)},
-                                                    {std::make_shared<Material>(cols[1], spec, 25.0f, 10.0f)},
-                                                    {std::make_shared<Material>(cols[2], spec, 25.0f, 10.0f)},
-                                                    {std::make_shared<Material>(cols[3], spec, 25.0f, 10.0f)},
-                                                    {std::make_shared<Material>(cols[4], spec, 25.0f, 10.0f)},
-                                                    {std::make_shared<Material>(cols[5], spec, 25.0f, 10.0f)},
-                                                    {std::make_shared<Material>(cols[6], spec, 25.0f, 10.0f)},
-                                                    {std::make_shared<Material>(cols[7], spec, 25.0f, 10.0f)},
-                                                    {std::make_shared<Material>(cols[8], spec, 25.0f, 10.0f)},
-                                                    {std::make_shared<Material>(cols[9], spec, 25.0f, 10.0f)} };
+    std::vector<std::shared_ptr<Material>> mats  = {{std::make_shared<Material>(cols[0], spec, 25.0f, 40.0f)},
+                                                    {std::make_shared<Material>(cols[1], spec, 25.0f, 40.0f)},
+                                                    {std::make_shared<Material>(cols[2], spec, 25.0f, 40.0f)},
+                                                    {std::make_shared<Material>(cols[3], spec, 25.0f, 40.0f)},
+                                                    {std::make_shared<Material>(cols[4], spec, 25.0f, 40.0f)},
+                                                    {std::make_shared<Material>(cols[5], spec, 25.0f, 40.0f)},
+                                                    {std::make_shared<Material>(cols[6], spec, 25.0f, 40.0f)},
+                                                    {std::make_shared<Material>(cols[7], spec, 25.0f, 40.0f)},
+                                                    {std::make_shared<Material>(cols[8], spec, 25.0f, 40.0f)},
+                                                    {std::make_shared<Material>(cols[9], spec, 25.0f, 40.0f)} };
 
     auto mdl_ptr = std::make_shared<model>();
     //creation of the root node and the SceneGraph
@@ -393,6 +395,7 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["PlanetAlpha"] = -1;
   m_shaders.at("planet").u_locs["PlanetRoughness"] = -1;
   m_shaders.at("planet").u_locs["LightPosition"] = -1;
+  m_shaders.at("planet").u_locs["CameraPosition"] = -1;
 
 
   m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
@@ -413,7 +416,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 
 // load models
 void ApplicationSolar::initializeGeometry() {
-  model planet_model = model_loader::obj(m_resource_path + "models/soc.obj", model::NORMAL);
+  model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
 
   // generate vertex array object
   glGenVertexArrays(1, &planet_object.vertex_AO);

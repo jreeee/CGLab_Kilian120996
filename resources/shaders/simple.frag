@@ -31,7 +31,8 @@ void main() {
   vec3 l = normalize(LightPosition - Position);
   vec3 v = normalize(CameraPosition - Position);
   vec3 h = (l + v) / (length(l+v));
-  vec3 specular = PlanetSpecular * pow(dot(h, v), 4 * PlanetAlpha);
+  vec3 specular = PlanetSpecular * pow(max(dot(h, v), 0), 4 * PlanetAlpha);
   //vec3 light = LightColor * LightIntensity;
-  out_Color = vec4(ambient + beta * (diffuse + specular) , 1.0);
+  //out_Color = vec4(ambient + beta * (diffuse + specular) , 1.0);
+  out_Color = vec4(specular, 1.0f);
 }
