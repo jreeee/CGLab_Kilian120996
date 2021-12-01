@@ -86,41 +86,47 @@ void ApplicationSolar::renderPlanet() const {
   
   // using the vector to get references to the planets to render each one
   for (auto i : m_geo) {
-    //rotating the placeholder in the center
-    auto i_parent = i->getParent();
-    i_parent->setLocalTransform(glm::rotate(i_parent->getLocalTransform(), 
-                                            float(0.01f * i->getRot()), 
-                                            glm::fvec3{0.0f, 1.0f, 0.0f}));
+
     glUseProgram(m_shaders.at("planet").handle);
 
-    auto model_matrix = i->getWorldTransform();
-    //rotating the planet around itself
-    model_matrix = glm::rotate(model_matrix, float(i->getSpin()), glm::fvec3{0.0f, 1.0f, 0.0f});
-    
-    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
-                      1, GL_FALSE, glm::value_ptr(model_matrix));
-    // extra matrix for normal transformation to keep them orthogonal to surface
-    // glm::fmat4 normal_matrix = glm::inverseTranspose(glm::inverse(m_scene_graph.getCamera()->getLocalTransform() * model_matrix));
-    // glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("NormalMatrix"),
-    //                  1, GL_FALSE, glm::value_ptr(normal_matrix));
-    auto mat = i->getMaterial();
     if (i->getName() == "Sun Geometry") {
       glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), ambient->getIntensity() * SUN_BRIGHTNESS);
     }
     else {
       glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), ambient->getIntensity());
     }
+
+    auto i_parent = i->getParent();
+    auto mat = i->getMaterial();
+    glm::vec3 l_pos(light->getWorldTransform() * ORIGIN);
+    glm::vec3 c_pos(m_scene_graph.getCamera()->getWorldTransform() * ORIGIN);
+
+    //rotating the placeholder in the center
+    i_parent->setLocalTransform(glm::rotate(i_parent->getLocalTransform(), 
+                                            float(0.01f * i->getRot()), 
+                                            glm::fvec3{0.0f, 1.0f, 0.0f}));
+
+    auto model_matrix = i->getWorldTransform();
+    //rotating the planet around itself
+    model_matrix = glm::rotate(model_matrix, float(i->getSpin()), glm::fvec3{0.0f, 1.0f, 0.0f});
+    
+    //will probably build a GLSL struct to to this a bit nicer
+    glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
+                      1, GL_FALSE, glm::value_ptr(model_matrix));
+
+    //all the colors
     glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), mat->diffuse->r, mat->diffuse->g, mat->diffuse->b);
     glUniform3f(m_shaders.at("planet").u_locs.at("AmbientColor"), ambient->getLightColor().r, ambient->getLightColor().g, ambient->getLightColor().b);
     glUniform3f(m_shaders.at("planet").u_locs.at("LightColor"), light->getLightColor().r, light->getLightColor().g, light->getLightColor().b);
-    glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light->getIntensity());
-    glm::vec3 l_pos(light->getWorldTransform() * ORIGIN);
-    glUniform3fv(m_shaders.at("planet").u_locs.at("LightPosition"), 1, glm::value_ptr(l_pos));
-    glm::vec3 c_pos(m_scene_graph.getCamera()->getWorldTransform() * ORIGIN);
-    glUniform3fv(m_shaders.at("planet").u_locs.at("CameraPosition"), 1, glm::value_ptr(c_pos));
     glUniform3f(m_shaders.at("planet").u_locs.at("PlanetSpecular"), mat->specular->r, mat->specular->g, mat->specular->b);
+    //positions
+    glUniform3fv(m_shaders.at("planet").u_locs.at("CameraPosition"), 1, glm::value_ptr(c_pos));
+    glUniform3fv(m_shaders.at("planet").u_locs.at("LightPosition"), 1, glm::value_ptr(l_pos));
+    //floats
+    glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light->getIntensity());
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetAlpha"), mat->alpha);
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetRoughness"), mat->roughness);
+
     // bind the VAO to draw
     glBindVertexArray(planet_object.vertex_AO);
 
@@ -208,6 +214,7 @@ void ApplicationSolar::uploadUniforms() {
                                                   {std::make_shared<Color>(0.9f, 0.5f, 0.1f)},
                                                   {std::make_shared<Color>(0.8f, 0.2f, 0.7f)},
                                                   {std::make_shared<Color>(0.2f, 0.5f, 0.9f)} };
+
     std::vector<std::shared_ptr<Material>> mats  = {{std::make_shared<Material>(cols[0], spec, 25.0f, 5.0f)},
                                                     {std::make_shared<Material>(cols[1], spec, 25.0f, 5.0f)},
                                                     {std::make_shared<Material>(cols[2], spec, 25.0f, 5.0f)},
@@ -387,7 +394,6 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.emplace("planet", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/simple.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/simple.frag"}}});
   // request uniform locations for shader program
-  //m_shaders.at("planet").u_locs["NormalMatrix"] = -1; calculated in the shader
   m_shaders.at("planet").u_locs["ModelMatrix"] = -1;
   m_shaders.at("planet").u_locs["ViewMatrix"] = -1;
   m_shaders.at("planet").u_locs["ProjectionMatrix"] = -1;

@@ -8,14 +8,14 @@ layout(location = 1) in vec3 in_Normal;
 uniform mat4 ModelMatrix;
 uniform mat4 ViewMatrix;
 uniform mat4 ProjectionMatrix;
-//uniform mat4 NormalMatrix;
 
-out vec3 pass_Normal;
+out vec3 Normal;
 out vec3 Position;
 
 void main(void)
 {
 	gl_Position = (ProjectionMatrix  * ViewMatrix * ModelMatrix) * vec4(in_Position, 1.0f);
-	pass_Normal = (inverse(transpose(ModelMatrix)) * vec4(in_Normal, 0.0f)).xyz;
+	//using the normal in the render Method did not work, so here it is again
+	Normal = (inverse(transpose(ModelMatrix)) * vec4(in_Normal, 0.0f)).xyz;
 	Position = vec3(ModelMatrix * vec4(in_Position, 1.0f));
 }
