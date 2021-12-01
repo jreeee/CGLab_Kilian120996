@@ -111,7 +111,9 @@ void ApplicationSolar::renderPlanet() const {
     glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light->getIntensity());
     glm::vec3 l_pos(light->getWorldTransform() * ORIGIN);
     glUniform3fv(m_shaders.at("planet").u_locs.at("LightPosition"), 1, glm::value_ptr(l_pos));
-
+    glUniform3f(m_shaders.at("planet").u_locs.at("PlanetSpecular"), mat->specular->r, mat->specular->g, mat->specular->b);
+    glUniform1f(m_shaders.at("planet").u_locs.at("PlanetAlpha"), mat->roughness);
+    glUniform1f(m_shaders.at("planet").u_locs.at("PlanetRoughness"), mat->alpha);
     // bind the VAO to draw
     glBindVertexArray(planet_object.vertex_AO);
 
@@ -387,7 +389,11 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["AmbientColor"] = -1;
   m_shaders.at("planet").u_locs["AmbientIntensity"] = -1;
   m_shaders.at("planet").u_locs["PlanetColor"] = -1;
+  m_shaders.at("planet").u_locs["PlanetSpecular"] = -1;
+  m_shaders.at("planet").u_locs["PlanetAlpha"] = -1;
+  m_shaders.at("planet").u_locs["PlanetRoughness"] = -1;
   m_shaders.at("planet").u_locs["LightPosition"] = -1;
+
 
   m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});
