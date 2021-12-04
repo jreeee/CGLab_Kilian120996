@@ -102,13 +102,12 @@ void ApplicationSolar::renderPlanet() const {
                                             float(0.01f * i->getRot()), 
                                             glm::fvec3{0.0f, 1.0f, 0.0f}));
 
-    auto model_matrix = i->getWorldTransform();
     //rotating the planet around itself
-    model_matrix = glm::rotate(model_matrix, float(i->getSpin()), glm::fvec3{0.0f, 1.0f, 0.0f});
+    i->setLocalTransform(glm::rotate(i->getLocalTransform(), float(0.01f * i->getSpin()), glm::fvec3{0.0f, 1.0f, 0.0f}));
     
     //will probably build a GLSL struct to to this a bit nicer
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
-                      1, GL_FALSE, glm::value_ptr(model_matrix));
+                      1, GL_FALSE, glm::value_ptr(i->getWorldTransform()));
 
     //all the colors
     glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), mat->diffuse->r, mat->diffuse->g, mat->diffuse->b);
@@ -237,15 +236,15 @@ void ApplicationSolar::uploadUniforms() {
 
     //storing pointers to the geo vector while initializing the geo nodes
     m_geo = { {std::make_shared<GeometryNode>(sun, "Sun Geometry", mdl_ptr, 0.0f, 1.0f, 0.0f, 1.0f, mats[0])},
-              {std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr, 0.2f, 0.3f, 1.5f, 0.35f, mats[1])},
-              {std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr, 0.3f, 0.1f, 3.2f, 0.4f, mats[2])},
-              {std::make_shared<GeometryNode>(earth, "Earth Geometry", mdl_ptr, 0.25f, 0.4f, 5.0f, 0.5f, mats[3])},
-              {std::make_shared<GeometryNode>(moon, "Moon Geometry", mdl_ptr, 0.4f, 0.23f, 2.0f, 0.5f, mats[4])},
-              {std::make_shared<GeometryNode>(mars, "Mars Geometry", mdl_ptr, 0.32f, 0.14f, 6.7f, 0.35f, mats[5])},
-              {std::make_shared<GeometryNode>(jupiter, "Jupiter Geometry", mdl_ptr, 0.13f, 0.26f, 9.8f, 0.7f, mats[6])},
-              {std::make_shared<GeometryNode>(saturn, "Saturn Geometry", mdl_ptr, 0.06f, 0.31f, 11.6f, 0.6f, mats[7])},
-              {std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr, 0.15f, 0.27f, 13.0f, 0.4f, mats[8])},
-              {std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr, 0.17f, 0.23f, 15.3f, 0.3f, mats[9])} };
+              {std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr, 1.5f, 0.3f, 1.5f, 0.35f, mats[1])},
+              {std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr, 0.5f, 0.1f, 3.2f, 0.4f, mats[2])},
+              {std::make_shared<GeometryNode>(earth, "Earth Geometry", mdl_ptr, 2.0f, 0.4f, 5.0f, 0.5f, mats[3])},
+              {std::make_shared<GeometryNode>(moon, "Moon Geometry", mdl_ptr, 1.7f, 0.23f, 2.0f, 0.5f, mats[4])},
+              {std::make_shared<GeometryNode>(mars, "Mars Geometry", mdl_ptr, 2.3f, 0.14f, 6.7f, 0.35f, mats[5])},
+              {std::make_shared<GeometryNode>(jupiter, "Jupiter Geometry", mdl_ptr, 1.1f, 0.26f, 9.8f, 0.7f, mats[6])},
+              {std::make_shared<GeometryNode>(saturn, "Saturn Geometry", mdl_ptr, 2.5f, 0.31f, 11.6f, 0.6f, mats[7])},
+              {std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr, 1.2f, 0.27f, 13.0f, 0.4f, mats[8])},
+              {std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr, 3.1f, 0.23f, 15.3f, 0.3f, mats[9])} };
 
     m_orbit = { {std::make_shared<GeometryNode>(mercury, "Mercury Orbit", 1.5f, mats[1])},
                 {std::make_shared<GeometryNode>(venus, "Venus Orbit", 3.2f, mats[2])},
@@ -415,7 +414,7 @@ void ApplicationSolar::initializeShaderPrograms() {
 
 // load models
 void ApplicationSolar::initializeGeometry() {
-  model planet_model = model_loader::obj(m_resource_path + "models/sphere.obj", model::NORMAL);
+  model planet_model = model_loader::obj(m_resource_path + "models/low-poly-benchy.obj", model::NORMAL);
 
   // generate vertex array object
   glGenVertexArrays(1, &planet_object.vertex_AO);

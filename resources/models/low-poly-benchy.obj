@@ -1,7 +1,6 @@
 # Blender v2.92.0 OBJ File: ''
 # www.blender.org
-mtllib low-poly-benchy.mtl
-o 3DBenchy
+o low-poly-benchy
 v 0.288820 -0.116371 0.055016
 v 0.289213 -0.111282 -0.055098
 v 0.286588 -0.144588 0.044279

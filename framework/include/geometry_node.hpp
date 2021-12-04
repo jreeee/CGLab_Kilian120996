@@ -31,6 +31,7 @@ class GeometryNode : public Node {
         GeometryNode(   std::shared_ptr<Node> parent, 
                         std::string const& name,
                         std::shared_ptr<model> model_ptr,
+                        //spin is the rotation around its own axis, rotation is around the sun
                         float spin,
                         float rotation,
                         float distance,
