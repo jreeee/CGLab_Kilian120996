@@ -5,12 +5,14 @@
 // constructors
 SceneGraph::SceneGraph():
     name_ {"default scene graph"},
-    root_ {nullptr} {
+    root_ {nullptr}, 
+    speed_ {1.0f} {
 }
 
 SceneGraph::SceneGraph(std::string const& name, std::shared_ptr<Node> root):
     name_ {name},
-    root_ {root} {
+    root_ {root},
+    speed_ {1.0f} {
 }
 
 SceneGraph::~SceneGraph() {
@@ -32,6 +34,14 @@ std::shared_ptr<Node> SceneGraph::getRoot() const {
 
 void SceneGraph::setRoot(std::shared_ptr<Node> root) {
     root_ = root;
+}
+
+float SceneGraph::getSpeed() const {
+    return speed_;
+}
+
+void SceneGraph::setSpeed(float speed) {
+    speed_ = speed;
 }
 
 std::string SceneGraph::printGraph() {

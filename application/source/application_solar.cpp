@@ -91,6 +91,7 @@ void ApplicationSolar::renderPlanet() const {
     glUseProgram(m_shaders.at("planet").handle);
 
     //setting the ambient intensity as the sun needs a higher one to shine
+    float speed = m_scene_graph.getSpeed();
     float intensity_a = (i->getName() == "Sun Geometry") ? ambient->getIntensity() * SUN_BRIGHTNESS : ambient->getIntensity();
     auto i_parent = i->getParent();
     auto mat = i->getMaterial();
@@ -99,11 +100,11 @@ void ApplicationSolar::renderPlanet() const {
 
     //rotating the placeholder in the center
     i_parent->setLocalTransform(glm::rotate(i_parent->getLocalTransform(), 
-                                            float(0.01f * i->getRot()), 
+                                            float(0.01f * speed * i->getRot()), 
                                             glm::fvec3{0.0f, 1.0f, 0.0f}));
 
     //rotating the planet around itself
-    i->setLocalTransform(glm::rotate(i->getLocalTransform(), float(0.01f * i->getSpin()), glm::fvec3{0.0f, 1.0f, 0.0f}));
+    i->setLocalTransform(glm::rotate(i->getLocalTransform(), float(0.01f * speed * i->getSpin()), glm::fvec3{0.0f, 1.0f, 0.0f}));
     
     //will probably build a GLSL struct to to this a bit nicer
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
@@ -209,7 +210,7 @@ void ApplicationSolar::uploadUniforms() {
         col.push_back(float(std::rand()%256)/255);
       }
       //creating the material
-      mats.push_back(std::make_shared<Material>(std::make_shared<Color>(col[0], col[1], col[2]), spec, 25.0f, 5.0f));
+      mats.push_back(std::make_shared<Material>(std::make_shared<Color>(col[0], col[1], col[2]), spec, 40.0f, 5.0f));
     }
     
     auto mdl_ptr = std::make_shared<model>();
@@ -480,6 +481,12 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
   //interestingly you can't use L-shift like the other keys, likely having to to with the modifier-properties it has
   else if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     camera_node->setLocalTransform(glm::translate(camera_node->getLocalTransform(), glm::fvec3{0.0f, -0.1f, 0.0f}));
+  }
+  else if (key == GLFW_KEY_P&& (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_scene_graph.setSpeed(m_scene_graph.getSpeed() + 0.1f);
+  }
+  else if (key == GLFW_KEY_M && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    m_scene_graph.setSpeed(m_scene_graph.getSpeed() - 0.1f);
   }
   uploadView();
 }

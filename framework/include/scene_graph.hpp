@@ -13,6 +13,7 @@ class SceneGraph {
         // member variables
         std::string name_;
         std::shared_ptr<Node> root_;
+        float speed_;
 
     public:
 
@@ -28,7 +29,8 @@ class SceneGraph {
         void setRoot(std::shared_ptr<Node> root);
         std::string printGraph();
         std::shared_ptr<CameraNode> getCamera() const;
-
+        float getSpeed() const;
+        void setSpeed(float speed_);
 };
 
 #endif
