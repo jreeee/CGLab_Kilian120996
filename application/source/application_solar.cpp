@@ -27,13 +27,14 @@ using namespace gl;
 #include <iostream>
 
 //Contstants
+const double Mouse_Multiplier = 0.005;
 const unsigned int STAR_COUNT = 100000;
 const unsigned int STAR_DENSITY = 150;
 const unsigned int STAR_BRIGHTNESS = 100;
 const unsigned int ORBIT_POINTS = 100;
 const glm::fvec4 ORIGIN = {0.0f, 0.0f, 0.0f, 1.0f};
 const float SUN_BRIGHTNESS = 30.0f;
-
+const unsigned int COLOR_SEED = 3;
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
@@ -89,13 +90,8 @@ void ApplicationSolar::renderPlanet() const {
 
     glUseProgram(m_shaders.at("planet").handle);
 
-    if (i->getName() == "Sun Geometry") {
-      glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), ambient->getIntensity() * SUN_BRIGHTNESS);
-    }
-    else {
-      glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), ambient->getIntensity());
-    }
-
+    //setting the ambient intensity as the sun needs a higher one to shine
+    float intensity_a = (i->getName() == "Sun Geometry") ? ambient->getIntensity() * SUN_BRIGHTNESS : ambient->getIntensity();
     auto i_parent = i->getParent();
     auto mat = i->getMaterial();
     glm::vec3 l_pos(light->getWorldTransform() * ORIGIN);
@@ -123,6 +119,7 @@ void ApplicationSolar::renderPlanet() const {
     glUniform3fv(m_shaders.at("planet").u_locs.at("CameraPosition"), 1, glm::value_ptr(c_pos));
     glUniform3fv(m_shaders.at("planet").u_locs.at("LightPosition"), 1, glm::value_ptr(l_pos));
     //floats
+    glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), intensity_a);
     glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light->getIntensity());
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetAlpha"), mat->alpha);
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetRoughness"), mat->roughness);
@@ -154,8 +151,8 @@ void ApplicationSolar::renderOrbits() const {
     }
     glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
-    auto mat = i->getMaterial();
-    glUniform3f(m_shaders.at("orbit").u_locs.at("in_Color"), mat->diffuse->r, mat->diffuse->g, mat->diffuse->b);
+    auto col = i->getMaterial()->diffuse;
+    glUniform3f(m_shaders.at("orbit").u_locs.at("in_Color"), col->r, col->g, col->b);
     glBindVertexArray(orbit_object.vertex_AO);
     glDrawArrays(orbit_object.draw_mode, 0, orbit_object.num_elements);
   }
@@ -201,31 +198,21 @@ void ApplicationSolar::uploadUniforms() {
 ///////////////////////////// intialisation functions /////////////////////////
   //build ScreenGraph
   void ApplicationSolar::initializeScreenGraph() {
-    // loop with rand values?
-    //Colors and Materials that are used by the GeoNodes
+    //creating the Materials
+    //specular, roughness and alpha are the same for every planet atm, that can be easily changed tho
     auto spec = std::make_shared<Color>(1.0f, 1.0f, 1.0f);
-    std::vector<std::shared_ptr<Color>> cols = {{std::make_shared<Color>(1.0f, 1.0f, 1.0f)},
-                                                  {std::make_shared<Color>(0.5f, 0.5f, 0.5f)},
-                                                  {std::make_shared<Color>(0.1f, 0.1f, 0.1f)},
-                                                  {std::make_shared<Color>(0.3f, 0.8f, 0.2f)},
-                                                  {std::make_shared<Color>(0.2f, 0.4f, 0.6f)},
-                                                  {std::make_shared<Color>(0.9f, 0.3f, 0.4f)},
-                                                  {std::make_shared<Color>(0.5f, 0.8f, 0.8f)},
-                                                  {std::make_shared<Color>(0.9f, 0.5f, 0.1f)},
-                                                  {std::make_shared<Color>(0.8f, 0.2f, 0.7f)},
-                                                  {std::make_shared<Color>(0.2f, 0.5f, 0.9f)} };
-
-    std::vector<std::shared_ptr<Material>> mats  = {{std::make_shared<Material>(cols[0], spec, 25.0f, 5.0f)},
-                                                    {std::make_shared<Material>(cols[1], spec, 25.0f, 5.0f)},
-                                                    {std::make_shared<Material>(cols[2], spec, 25.0f, 5.0f)},
-                                                    {std::make_shared<Material>(cols[3], spec, 25.0f, 5.0f)},
-                                                    {std::make_shared<Material>(cols[4], spec, 25.0f, 5.0f)},
-                                                    {std::make_shared<Material>(cols[5], spec, 25.0f, 5.0f)},
-                                                    {std::make_shared<Material>(cols[6], spec, 25.0f, 5.0f)},
-                                                    {std::make_shared<Material>(cols[7], spec, 25.0f, 5.0f)},
-                                                    {std::make_shared<Material>(cols[8], spec, 25.0f, 5.0f)},
-                                                    {std::make_shared<Material>(cols[9], spec, 25.0f, 5.0f)} };
-
+    std::vector<std::shared_ptr<Material>> mats;
+    for (int i = 0; i < 10; ++i) {
+      //creating the planet color (diffuse)
+      std::vector<float> col;
+      for (int j = 1; j < 4; ++j) {
+        srand(3 * i + j + COLOR_SEED);
+        col.push_back(float(std::rand()%256)/255);
+      }
+      //creating the material
+      mats.push_back(std::make_shared<Material>(std::make_shared<Color>(col[0], col[1], col[2]), spec, 25.0f, 5.0f));
+    }
+    
     auto mdl_ptr = std::make_shared<model>();
     //creation of the root node and the SceneGraph
     auto root = std::make_shared<Node>(nullptr, "Root");
@@ -250,26 +237,26 @@ void ApplicationSolar::uploadUniforms() {
 
     //storing pointers to the geo vector while initializing the geo nodes
     m_geo = { {std::make_shared<GeometryNode>(sun, "Sun Geometry", mdl_ptr, 0.0f, 1.0f, 0.0f, 1.0f, mats[0])},
-              {std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr, 0.2f, 0.3f, 1.5f, 0.35f, mats[4])},
-              {std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr, 0.3f, 0.1f, 3.2f, 0.4f, mats[5])},
-              {std::make_shared<GeometryNode>(earth, "Earth Geometry", mdl_ptr, 0.25f, 0.4f, 5.0f, 0.5f, mats[9])},
-              {std::make_shared<GeometryNode>(moon, "Moon Geometry", mdl_ptr, 0.4f, 0.23f, 2.0f, 0.5f, mats[1])},
-              {std::make_shared<GeometryNode>(mars, "Mars Geometry", mdl_ptr, 0.32f, 0.14f, 6.7f, 0.35f, mats[6])},
-              {std::make_shared<GeometryNode>(jupiter, "Jupiter Geometry", mdl_ptr, 0.13f, 0.26f, 9.8f, 0.7f, mats[7])},
-              {std::make_shared<GeometryNode>(saturn, "Saturn Geometry", mdl_ptr, 0.06f, 0.31f, 11.6f, 0.6f, mats[8])},
-              {std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr, 0.15f, 0.27f, 13.0f, 0.4f, mats[5])},
-              {std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr, 0.17f, 0.23f, 15.3f, 0.3f, mats[7])} };
+              {std::make_shared<GeometryNode>(mercury, "Mercury Geometry", mdl_ptr, 0.2f, 0.3f, 1.5f, 0.35f, mats[1])},
+              {std::make_shared<GeometryNode>(venus, "Venus Geometry", mdl_ptr, 0.3f, 0.1f, 3.2f, 0.4f, mats[2])},
+              {std::make_shared<GeometryNode>(earth, "Earth Geometry", mdl_ptr, 0.25f, 0.4f, 5.0f, 0.5f, mats[3])},
+              {std::make_shared<GeometryNode>(moon, "Moon Geometry", mdl_ptr, 0.4f, 0.23f, 2.0f, 0.5f, mats[4])},
+              {std::make_shared<GeometryNode>(mars, "Mars Geometry", mdl_ptr, 0.32f, 0.14f, 6.7f, 0.35f, mats[5])},
+              {std::make_shared<GeometryNode>(jupiter, "Jupiter Geometry", mdl_ptr, 0.13f, 0.26f, 9.8f, 0.7f, mats[6])},
+              {std::make_shared<GeometryNode>(saturn, "Saturn Geometry", mdl_ptr, 0.06f, 0.31f, 11.6f, 0.6f, mats[7])},
+              {std::make_shared<GeometryNode>(uranus, "Uranus Geometry", mdl_ptr, 0.15f, 0.27f, 13.0f, 0.4f, mats[8])},
+              {std::make_shared<GeometryNode>(neptune, "Neptune Geometry", mdl_ptr, 0.17f, 0.23f, 15.3f, 0.3f, mats[9])} };
 
-    m_orbit = { {std::make_shared<GeometryNode>(mercury, "Mercury Orbit", 1.5f, mats[4])},
-                {std::make_shared<GeometryNode>(venus, "Venus Orbit", 3.2f, mats[5])},
-                {std::make_shared<GeometryNode>(earth, "Earth Orbit", 5.0f, mats[9])},
+    m_orbit = { {std::make_shared<GeometryNode>(mercury, "Mercury Orbit", 1.5f, mats[1])},
+                {std::make_shared<GeometryNode>(venus, "Venus Orbit", 3.2f, mats[2])},
+                {std::make_shared<GeometryNode>(earth, "Earth Orbit", 5.0f, mats[3])},
                 //initializing with negative spin and rotation to cancel out the planet holder
-                {std::make_shared<GeometryNode>(moon, "Moon Orbit", mdl_ptr, -0.4f, -0.23f, 2.0f, 1.0f, mats[1])},
-                {std::make_shared<GeometryNode>(mars, "Mars Orbit", 6.7f, mats[6])},
-                {std::make_shared<GeometryNode>(jupiter, "Jupiter Orbit", 9.8f, mats[7])},
-                {std::make_shared<GeometryNode>(saturn, "Saturn Orbit", 11.6f, mats[8])},
-                {std::make_shared<GeometryNode>(uranus, "Uranus Orbit", 13.0f, mats[5])},
-                {std::make_shared<GeometryNode>(neptune, "Neptune Orbit", 15.3f, mats[7])} };
+                {std::make_shared<GeometryNode>(moon, "Moon Orbit", mdl_ptr, -0.4f, -0.23f, 2.0f, 1.0f, mats[4])},
+                {std::make_shared<GeometryNode>(mars, "Mars Orbit", 6.7f, mats[5])},
+                {std::make_shared<GeometryNode>(jupiter, "Jupiter Orbit", 9.8f, mats[6])},
+                {std::make_shared<GeometryNode>(saturn, "Saturn Orbit", 11.6f, mats[7])},
+                {std::make_shared<GeometryNode>(uranus, "Uranus Orbit", 13.0f, mats[8])},
+                {std::make_shared<GeometryNode>(neptune, "Neptune Orbit", 15.3f, mats[9])} };
 
     //adding all the nodes that are children of root
     root->addChildren(camera);
@@ -500,13 +487,12 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
 
 //handle delta mouse movement input
 void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
-  double multiplier = 0.005; //stored as a double, so that we can easily multiply with pos_n and then cast to float
   auto camera_node = m_scene_graph.getCamera();
 
   // mouse handling in x and y directions
-  camera_node->setLocalTransform(glm::rotate( camera_node->getLocalTransform(), float(pos_x * multiplier),
+  camera_node->setLocalTransform(glm::rotate( camera_node->getLocalTransform(), float(pos_x * Mouse_Multiplier),
                                     glm::fvec3{0.0f, -1.0f, 0.0f}));
-  camera_node->setLocalTransform(glm::rotate(camera_node->getLocalTransform(), float(pos_y * multiplier),
+  camera_node->setLocalTransform(glm::rotate(camera_node->getLocalTransform(), float(pos_y * Mouse_Multiplier),
                                     glm::fvec3{-1.0f, 0.0f, 0.0f}));
 
   uploadView();
