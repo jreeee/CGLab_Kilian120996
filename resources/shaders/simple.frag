@@ -5,6 +5,7 @@
 
 in  vec3 Position;
 in  vec3 Normal;
+in  vec2 TexCoord;
 out vec4 out_Color;
 
 //in the renderPlanet
@@ -18,6 +19,7 @@ uniform float PlanetRoughness;
 uniform vec3  PlanetSpecular;
 uniform float PlanetAlpha;
 uniform vec3  CameraPosition;
+uniform sampler2D ourTexture;
 
 //used in the keyCallback
 uniform bool  Cel;
@@ -55,5 +57,6 @@ void main() {
       phong = PlanetColor - 0.3f;
     }
   }
-  out_Color = vec4(phong, 1.0f);
+  //out_Color = vec4(phong, 1.0f);
+  out_Color = texture(ourTexture, TexCoord);
 }

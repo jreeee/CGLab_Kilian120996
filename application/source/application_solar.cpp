@@ -4,6 +4,7 @@
 #include "utils.hpp"
 #include "shader_loader.hpp"
 #include "model_loader.hpp"
+#include "texture_loader.hpp"
 
 #include <glbinding/gl/gl.h>
 // use gl definitions from glbinding 
@@ -56,6 +57,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   initializeGeometry(m_resource_path + "models/sphere.obj");
   initializeStars();
   initializeOrbits();
+  initializeTextures();
   initializeShaderPrograms();
 }
 
@@ -375,6 +377,28 @@ void ApplicationSolar::initializeOrbits() {
   orbit_object.num_elements = ORBIT_POINTS;
 }
 
+void ApplicationSolar::initializeTextures() {
+  //iterating over all planets
+  for (auto i : m_geo) {
+    //getting the path
+    auto path = m_resource_path + "textures/" + i->getParent()->getName() + ".png";
+    //storing the image in texture
+    pixel_data texture = texture_loader::file(path);
+    //initialiasing
+    unsigned int texture_id;
+    glGenTextures(1, &texture_id);
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    //parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, texture.channels, texture.width, texture.height, 0, texture.channels, texture.channel_type, texture.ptr());
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
+}
+
 // load shader sources
 void ApplicationSolar::initializeShaderPrograms() {
   // store shader program objects in container
@@ -429,15 +453,18 @@ void ApplicationSolar::initializeGeometry(std::string const& path) {
   // configure currently bound array buffer
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * planet_model.data.size(), planet_model.data.data(), GL_STATIC_DRAW);
 
-  // activate first attribute on gpu
+  // activate first attribute for the gpu
   glEnableVertexAttribArray(0);
   // first attribute is 3 floats with no offset & stride
   glVertexAttribPointer(0, model::POSITION.components, model::POSITION.type, GL_FALSE, planet_model.vertex_bytes, planet_model.offsets[model::POSITION]);
-  // activate second attribute on gpu
+  // activate second attribute for the gpu
   glEnableVertexAttribArray(1);
   // second attribute is 3 floats with no offset & stride
   glVertexAttribPointer(1, model::NORMAL.components, model::NORMAL.type, GL_FALSE, planet_model.vertex_bytes, planet_model.offsets[model::NORMAL]);
-
+  // third attribute for the gpu
+  glEnableVertexAttribArray(2);
+  //texture
+  glVertexAttribPointer(2, model::TEXCOORD.components, model::TEXCOORD.type, GL_FALSE, planet_model.vertex_bytes, planet_model.offsets[model::TEXCOORD]);
    // generate generic buffer
   glGenBuffers(1, &planet_object.element_BO);
   // bind this as an vertex array buffer containing all attributes
