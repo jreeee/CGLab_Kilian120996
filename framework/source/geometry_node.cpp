@@ -79,3 +79,11 @@ std::shared_ptr<Material> GeometryNode::getMaterial() const {
 void GeometryNode::setMaterial(std::shared_ptr<Material> material) {
     material_ = material;
 }
+
+void GeometryNode::setTexId(unsigned int tex_id) {
+    tex_id_ = tex_id;
+}
+
+unsigned int GeometryNode::getTexId() const{
+    return tex_id_;
+}

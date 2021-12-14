@@ -97,6 +97,7 @@ void ApplicationSolar::renderPlanet() const {
     float intensity_a = (i->getName() == "Sun Geometry") ? ambient->getIntensity() * SUN_BRIGHTNESS : ambient->getIntensity();
     auto i_parent = i->getParent();
     auto mat = i->getMaterial();
+    auto texture = i->getTexId();
     glm::vec3 l_pos(light->getWorldTransform() * ORIGIN);
     glm::vec3 c_pos(m_scene_graph.getCamera()->getWorldTransform() * ORIGIN);
 
@@ -128,7 +129,8 @@ void ApplicationSolar::renderPlanet() const {
 
     // bind the VAO to draw
     glBindVertexArray(planet_object.vertex_AO);
-
+    // bind the specific texture
+    glBindTexture(GL_TEXTURE_2D, texture);
     // draw bound vertex array using bound shader
     glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
   }
@@ -387,6 +389,7 @@ void ApplicationSolar::initializeTextures() {
     //initialiasing
     unsigned int texture_id;
     glGenTextures(1, &texture_id);
+    i->setTexId(texture_id);
     glBindTexture(GL_TEXTURE_2D, texture_id);
     //parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -419,6 +422,7 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["LightPosition"] = -1;
   m_shaders.at("planet").u_locs["CameraPosition"] = -1;
   m_shaders.at("planet").u_locs["Cel"] = -1;
+  m_shaders.at("planet").u_locs["Solid"] = -1;
 
 
   m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
@@ -505,14 +509,18 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
     glUseProgram(m_shaders.at("planet").handle);
     glUniform1b(m_shaders.at("planet").u_locs.at("Cel"), false);
   }
-  //interestingly you can't use L-shift like the other keys, likely having to to with the modifier-properties it has
-  else if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
-    camera_node->setLocalTransform(glm::translate(camera_node->getLocalTransform(), glm::fvec3{0.0f, -0.1f, 0.0f}));
+  else if (key == GLFW_KEY_3) {
+    glUseProgram(m_shaders.at("planet").handle);
+    glUniform1b(m_shaders.at("planet").u_locs.at("Solid"), true);
   }
-  else if (key == GLFW_KEY_P&& (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+  else if (key == GLFW_KEY_4) {
+    glUseProgram(m_shaders.at("planet").handle);
+    glUniform1b(m_shaders.at("planet").u_locs.at("Solid"), false);
+  }
+  else if (key == GLFW_KEY_5 && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_scene_graph.setSpeed(m_scene_graph.getSpeed() + 0.1f);
   }
-  else if (key == GLFW_KEY_M && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+  else if (key == GLFW_KEY_6 && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_scene_graph.setSpeed(m_scene_graph.getSpeed() - 0.1f);
   }
   else if (key == GLFW_KEY_9 && action == GLFW_PRESS) {
@@ -520,6 +528,10 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
   }
   else if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
     initializeGeometry(m_resource_path + "models/low-poly-benchy.obj");
+  }
+  //interestingly you can't use L-shift like the other keys, likely having to to with the modifier-properties it has
+  else if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
+    camera_node->setLocalTransform(glm::translate(camera_node->getLocalTransform(), glm::fvec3{0.0f, -0.1f, 0.0f}));
   }
   uploadView();
 }

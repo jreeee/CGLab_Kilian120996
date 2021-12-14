@@ -23,6 +23,7 @@ uniform sampler2D ourTexture;
 
 //used in the keyCallback
 uniform bool  Cel;
+uniform bool  Solid;
 
 void main() {
   //ambient
@@ -34,7 +35,8 @@ void main() {
 
   //diffuse as described in the slides
   //Cd (l - n) rho/PI
-  vec3 diffuse =  PlanetColor * dot((light_dir) , Normal) * 
+  vec3 main_col = (Solid) ? PlanetColor : vec3(texture(ourTexture, TexCoord));
+  vec3 diffuse = main_col * dot((light_dir) , Normal) * 
                   (PlanetRoughness / PI);
 
   //specular
@@ -57,6 +59,5 @@ void main() {
       phong = PlanetColor - 0.3f;
     }
   }
-  //out_Color = vec4(phong, 1.0f);
-  out_Color = texture(ourTexture, TexCoord);
+  out_Color = vec4(phong, 1.0f);
 }
