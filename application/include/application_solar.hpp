@@ -36,6 +36,7 @@ class ApplicationSolar : public Application {
   void initializeStars();
   void initializeOrbits();
   void initializeTextures();
+  void initializeSkybox();
   void initializeShaderPrograms();
   void initializeGeometry(std::string const& path);
   // update uniform values

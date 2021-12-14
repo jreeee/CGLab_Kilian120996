@@ -402,6 +402,17 @@ void ApplicationSolar::initializeTextures() {
   }
 }
 
+void ApplicationSolar::initializeSkybox() {
+  std::vector<pixel_data> skybox;
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_t"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_l"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_f"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_r"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_d"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_b"));
+
+}
+
 // load shader sources
 void ApplicationSolar::initializeShaderPrograms() {
   // store shader program objects in container

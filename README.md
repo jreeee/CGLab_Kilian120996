@@ -38,6 +38,7 @@ toggle compilation with cmake option _BUILD_EXAMPLES_
 ### Texture Maps used from
 * [**NASA JPL**](https://space.jpl.nasa.gov/tmaps/) for the planets
 * [**NASA JPL**](https://svs.gsfc.nasa.gov/30362) for the sun
+* [**clean png**](https://www.cleanpng.com/png-space-skybox-texture-mapping-cube-mapping-night-sk-776480/) for the skybox
 
 ### License
 this framework is licensed undet the GPL v3
