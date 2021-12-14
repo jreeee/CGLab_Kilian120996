@@ -53,7 +53,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   //view projection
   camera_node->setProjectionMatrix(utils::calculate_projection_matrix(initial_aspect_ratio));
 
-  initializeGeometry();
+  initializeGeometry(m_resource_path + "models/sphere.obj");
   initializeStars();
   initializeOrbits();
   initializeShaderPrograms();
@@ -414,8 +414,8 @@ void ApplicationSolar::initializeShaderPrograms() {
 }
 
 // load models
-void ApplicationSolar::initializeGeometry() {
-  model planet_model = model_loader::obj(m_resource_path + "models/low-poly-benchy.obj", model::NORMAL);
+void ApplicationSolar::initializeGeometry(std::string const& path) {
+  model planet_model = model_loader::obj(path, model::NORMAL | model::TEXCOORD);
 
   // generate vertex array object
   glGenVertexArrays(1, &planet_object.vertex_AO);
@@ -487,6 +487,12 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
   }
   else if (key == GLFW_KEY_M && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_scene_graph.setSpeed(m_scene_graph.getSpeed() - 0.1f);
+  }
+  else if (key == GLFW_KEY_9 && action == GLFW_PRESS) {
+    initializeGeometry(m_resource_path + "models/sphere.obj");
+  }
+  else if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
+    initializeGeometry(m_resource_path + "models/low-poly-benchy.obj");
   }
   uploadView();
 }

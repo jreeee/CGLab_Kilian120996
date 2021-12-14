@@ -35,6 +35,10 @@ toggle compilation with cmake option _BUILD_EXAMPLES_
 * [**tinyobjloader**](http://syoyo.github.io/tinyobjloader/) for model loading
 * [**stb_image**](https://github.com/nothings/stb) for image loading
 
+### Texture Maps used from
+* [**NASA JPL**](https://space.jpl.nasa.gov/tmaps/) for the planets
+* [**NASA JPL**](https://svs.gsfc.nasa.gov/30362) for the sun
+
 ### License
 this framework is licensed undet the GPL v3
 * **GLFW** is licensed under the zlib/libpng license

@@ -36,7 +36,7 @@ class ApplicationSolar : public Application {
   void initializeStars();
   void initializeOrbits();
   void initializeShaderPrograms();
-  void initializeGeometry();
+  void initializeGeometry(std::string const& path);
   // update uniform values
   void uploadUniforms();
   // upload projection matrix
