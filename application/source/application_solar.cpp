@@ -30,13 +30,13 @@ using namespace gl;
 //Contstants
 const double Mouse_Multiplier = 0.005;
 const unsigned int STAR_COUNT = 100000;
-const unsigned int STAR_DENSITY = 150;
+const unsigned int STAR_DENSITY = 1000;
 const unsigned int STAR_BRIGHTNESS = 100;
 const unsigned int ORBIT_POINTS = 100;
 const glm::fvec4 ORIGIN = {0.0f, 0.0f, 0.0f, 1.0f};
-const float SUN_BRIGHTNESS = 30.0f;
+float SUN_BRIGHTNESS = 6.0f;
 const unsigned int COLOR_SEED = 3;
-const float SKYBOX_SIZE = 500.0f;
+const float SKYBOX_SIZE = 1000.0f;
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
@@ -60,7 +60,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   initializeStars();
   initializeOrbits();
   initializeTextures();
-  //initializeSkybox();
+  initializeSkybox();
   initializeShaderPrograms();
 }
 
@@ -83,7 +83,7 @@ void ApplicationSolar::render() const {
   renderStars();
   renderOrbits();
   renderPlanets();
-  //renderSkybox();
+  renderSkybox();
 }
 
 
@@ -189,9 +189,9 @@ void ApplicationSolar::uploadView() {
   glUseProgram(m_shaders.at("orbit").handle);
   glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ViewMatrix"),
                      1, GL_FALSE, glm::value_ptr(view_matrix));
-  // glUseProgram(m_shaders.at("skybox").handle);
-  // glUniformMatrix4fv(m_shaders.at("skybox").u_locs.at("ViewMatrix"),
-  //                     1, GL_FALSE, glm::value_ptr(view_matrix));
+  glUseProgram(m_shaders.at("skybox").handle);
+  glUniformMatrix4fv(m_shaders.at("skybox").u_locs.at("ViewMatrix"),
+                      1, GL_FALSE, glm::value_ptr(view_matrix));
 }
 
 void ApplicationSolar::uploadProjection() {
@@ -207,9 +207,9 @@ void ApplicationSolar::uploadProjection() {
   glUseProgram(m_shaders.at("orbit").handle);
   glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ProjectionMatrix"),
                      1, GL_FALSE, glm::value_ptr(camera_proj));
-  // glUseProgram(m_shaders.at("skybox").handle);
-  // glUniformMatrix4fv(m_shaders.at("skybox").u_locs.at("ProjectionMatrix"),
-  //                    1, GL_FALSE, glm::value_ptr(camera_proj));
+  glUseProgram(m_shaders.at("skybox").handle);
+  glUniformMatrix4fv(m_shaders.at("skybox").u_locs.at("ProjectionMatrix"),
+                     1, GL_FALSE, glm::value_ptr(camera_proj));
 }
 
 // update uniform locations
@@ -457,10 +457,10 @@ void ApplicationSolar::initializeSkybox() {
   std::vector<pixel_data> skybox;
   skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_r.png"));
   skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_l.png"));
-  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_t.png"));
   skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_b.png"));
-  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_d.png"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_t.png"));
   skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_f.png"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_d.png"));
 
   for (int i = 0; i < skybox.size(); ++i) {
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, skybox[i].channels, skybox[i].width, skybox[i].height, 0, skybox[i].channels, skybox[i].channel_type, skybox[i].ptr());
@@ -511,10 +511,10 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("orbit").u_locs["ProjectionMatrix"] = -1;
   m_shaders.at("orbit").u_locs["in_Color"] = -1;
 
-  // m_shaders.emplace("skybox", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/skybox.vert"},
-  //                                          {GL_FRAGMENT_SHADER, m_resource_path + "shaders/skybox.frag"}}});
-  // m_shaders.at("skybox").u_locs["ProjectionMatrix"] = -1;
-  // m_shaders.at("skybox").u_locs["ViewMatrix"] = -1;
+  m_shaders.emplace("skybox", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/skybox.vert"},
+                                           {GL_FRAGMENT_SHADER, m_resource_path + "shaders/skybox.frag"}}});
+  m_shaders.at("skybox").u_locs["ProjectionMatrix"] = -1;
+  m_shaders.at("skybox").u_locs["ViewMatrix"] = -1;
 }
 
 // load models
@@ -605,6 +605,12 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
   else if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
     initializeGeometry(m_resource_path + "models/low-poly-benchy.obj");
   }
+  else if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
+    SUN_BRIGHTNESS = SUN_BRIGHTNESS * 5.0f;
+  }
+  else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
+    SUN_BRIGHTNESS = SUN_BRIGHTNESS / 5.0f;
+  }
   //interestingly you can't use L-shift like the other keys, likely having to to with the modifier-properties it has
   else if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     camera_node->setLocalTransform(glm::translate(camera_node->getLocalTransform(), glm::fvec3{0.0f, -0.1f, 0.0f}));
@@ -617,7 +623,7 @@ void ApplicationSolar::mouseCallback(double pos_x, double pos_y) {
   auto camera_node = m_scene_graph.getCamera();
 
   // mouse handling in x and y directions
-  camera_node->setLocalTransform(glm::rotate( camera_node->getLocalTransform(), float(pos_x * Mouse_Multiplier),
+  camera_node->setLocalTransform(glm::rotate(camera_node->getLocalTransform(), float(pos_x * Mouse_Multiplier),
                                     glm::fvec3{0.0f, -1.0f, 0.0f}));
   camera_node->setLocalTransform(glm::rotate(camera_node->getLocalTransform(), float(pos_y * Mouse_Multiplier),
                                     glm::fvec3{-1.0f, 0.0f, 0.0f}));

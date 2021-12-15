@@ -19,7 +19,8 @@ uniform float PlanetRoughness;
 uniform vec3  PlanetSpecular;
 uniform float PlanetAlpha;
 uniform vec3  CameraPosition;
-uniform sampler2D ourTexture;
+
+uniform sampler2D planetTexture;
 
 //used in the keyCallback
 uniform bool  Cel;
@@ -35,7 +36,7 @@ void main() {
 
   //diffuse as described in the slides
   //Cd (l - n) rho/PI
-  vec3 main_col = (Solid) ? PlanetColor : vec3(texture(ourTexture, TexCoord));
+  vec3 main_col = (Solid) ? PlanetColor : vec3(texture(planetTexture, TexCoord));
   vec3 diffuse = main_col * dot((light_dir) , Normal) * 
                   (PlanetRoughness / PI);
 
