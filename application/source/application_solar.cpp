@@ -34,9 +34,9 @@ const unsigned int STAR_DENSITY = 1000;
 const unsigned int STAR_BRIGHTNESS = 100;
 const unsigned int ORBIT_POINTS = 100;
 const glm::fvec4 ORIGIN = {0.0f, 0.0f, 0.0f, 1.0f};
-float SUN_BRIGHTNESS = 6.0f;
 const unsigned int COLOR_SEED = 3;
 const float SKYBOX_SIZE = 1000.0f;
+const float SUN_BRIGHTNESS = 10.0f;
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
@@ -100,7 +100,7 @@ void ApplicationSolar::renderPlanets() const {
 
     //setting the ambient intensity as the sun needs a higher one to shine
     float speed = m_scene_graph.getSpeed();
-    float intensity_a = (i->getName() == "Sun Geometry") ? ambient->getIntensity() * SUN_BRIGHTNESS : ambient->getIntensity();
+    float intensity_a = (i->getName() == "Sun Geometry") ? ambient->getIntensity() * light->getIntensity() : ambient->getIntensity();
     auto i_parent = i->getParent();
     auto mat = i->getMaterial();
     auto texture = i->getTexId(0);
@@ -311,7 +311,7 @@ void ApplicationSolar::uploadUniforms() {
     venus->addChildren(m_geo[2]);
     earth->addChildren(m_geo[3]);
     m_geo[3]->addChildren(moon);
-    m_geo[3]->setNormal(true);
+    m_geo[4]->setNormal(true);
     moon->setParent(m_geo[3]);
     moon->addChildren(m_geo[4]);
     mars->addChildren(m_geo[5]);
@@ -418,7 +418,7 @@ void ApplicationSolar::initializeTextures() {
     NORMAL:
     auto path = m_resource_path + "textures/" + i->getParent()->getName() + ".png";
     if (extra) {
-      auto path = m_resource_path + "textures/" + i->getParent()->getName() + "Normal.png";
+      path = m_resource_path + "textures/" + i->getParent()->getName() + "Normal.png";
     }
     //storing the image in texture
     pixel_data texture = texture_loader::file(path);
@@ -628,10 +628,12 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
     initializeGeometry(m_resource_path + "models/low-poly-benchy.obj");
   }
   else if (key == GLFW_KEY_UP && action == GLFW_PRESS) {
-    SUN_BRIGHTNESS = SUN_BRIGHTNESS * 5.0f;
+    auto light = std::dynamic_pointer_cast<PointLightNode>(m_scene_graph.getRoot()->getChildren("PointLight"));
+    light->setIntensity(light->getIntensity() * 2.0f);
   }
   else if (key == GLFW_KEY_DOWN && action == GLFW_PRESS) {
-    SUN_BRIGHTNESS = SUN_BRIGHTNESS / 5.0f;
+  auto light = std::dynamic_pointer_cast<PointLightNode>(m_scene_graph.getRoot()->getChildren("PointLight"));
+  light->setIntensity(light->getIntensity() / 2.0f);
   }
   //interestingly you can't use L-shift like the other keys, likely having to to with the modifier-properties it has
   else if (key == GLFW_KEY_LEFT_SHIFT  && (action == GLFW_PRESS || action == GLFW_REPEAT)) {

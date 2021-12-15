@@ -41,6 +41,7 @@ void main() {
   //diffuse as described in the slides
   //Cd (l - n) rho/PI
   vec3 main_col = (Solid) ? PlanetColor : vec3(texture(planetTexture, TexCoord));
+  //main_col = (HasNormal) ? vec3(texture(normalTexture, TexCoord)) : vec3(texture(planetTexture, TexCoord));
   vec3 diffuse = main_col * dot((light_dir) , Normal) * 
                   (PlanetRoughness / PI);
 
@@ -64,5 +65,10 @@ void main() {
       phong = PlanetColor - 0.3f;
     }
   }
-  out_Color = vec4(phong, 1.0f);
+  if (HasNormal) {
+    out_Color = texture(normalTexture, TexCoord);
+  }
+  else {
+    out_Color = vec4(phong, 1.0f);
+  }
 }
