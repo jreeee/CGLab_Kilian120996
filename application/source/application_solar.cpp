@@ -60,7 +60,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   initializeStars();
   initializeOrbits();
   initializeTextures();
-  initializeSkybox();
+  //initializeSkybox();
   initializeShaderPrograms();
 }
 
@@ -83,7 +83,7 @@ void ApplicationSolar::render() const {
   renderStars();
   renderOrbits();
   renderPlanets();
-  renderSkybox();
+  //renderSkybox();
 }
 
 
@@ -189,9 +189,9 @@ void ApplicationSolar::uploadView() {
   glUseProgram(m_shaders.at("orbit").handle);
   glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ViewMatrix"),
                      1, GL_FALSE, glm::value_ptr(view_matrix));
-  glUseProgram(m_shaders.at("skybox").handle);
-  glUniformMatrix4fv(m_shaders.at("skybox").u_locs.at("ViewMatrix"),
-                      1, GL_FALSE, glm::value_ptr(view_matrix));
+  // glUseProgram(m_shaders.at("skybox").handle);
+  // glUniformMatrix4fv(m_shaders.at("skybox").u_locs.at("ViewMatrix"),
+  //                     1, GL_FALSE, glm::value_ptr(view_matrix));
 }
 
 void ApplicationSolar::uploadProjection() {
@@ -207,9 +207,9 @@ void ApplicationSolar::uploadProjection() {
   glUseProgram(m_shaders.at("orbit").handle);
   glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ProjectionMatrix"),
                      1, GL_FALSE, glm::value_ptr(camera_proj));
-  glUseProgram(m_shaders.at("skybox").handle);
-  glUniformMatrix4fv(m_shaders.at("skybox").u_locs.at("ProjectionMatrix"),
-                     1, GL_FALSE, glm::value_ptr(camera_proj));
+  // glUseProgram(m_shaders.at("skybox").handle);
+  // glUniformMatrix4fv(m_shaders.at("skybox").u_locs.at("ProjectionMatrix"),
+  //                    1, GL_FALSE, glm::value_ptr(camera_proj));
 }
 
 // update uniform locations
@@ -472,7 +472,6 @@ void ApplicationSolar::initializeSkybox() {
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-
 }
 
 // load shader sources
@@ -512,10 +511,10 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("orbit").u_locs["ProjectionMatrix"] = -1;
   m_shaders.at("orbit").u_locs["in_Color"] = -1;
 
-  m_shaders.emplace("skybox", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/skybox.vert"},
-                                           {GL_FRAGMENT_SHADER, m_resource_path + "shaders/skybox.frag"}}});
-  m_shaders.at("skybox").u_locs["ProjectionMatrix"] = -1;
-  m_shaders.at("skybox").u_locs["ViewMatrix"] = -1;
+  // m_shaders.emplace("skybox", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/skybox.vert"},
+  //                                          {GL_FRAGMENT_SHADER, m_resource_path + "shaders/skybox.frag"}}});
+  // m_shaders.at("skybox").u_locs["ProjectionMatrix"] = -1;
+  // m_shaders.at("skybox").u_locs["ViewMatrix"] = -1;
 }
 
 // load models
