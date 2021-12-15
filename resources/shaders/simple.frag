@@ -24,6 +24,7 @@ uniform sampler2D planetTexture;
 
 //Normals
 uniform bool HasNormal;
+uniform sampler2D normalTexture;
 
 //used in the keyCallback
 uniform bool  Cel;

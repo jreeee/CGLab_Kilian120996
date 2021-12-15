@@ -104,6 +104,7 @@ void ApplicationSolar::renderPlanets() const {
     auto i_parent = i->getParent();
     auto mat = i->getMaterial();
     auto texture = i->getTexId(0);
+    bool hasNormal = i->hasNormal();
     glm::vec3 l_pos(light->getWorldTransform() * ORIGIN);
     glm::vec3 c_pos(m_scene_graph.getCamera()->getWorldTransform() * ORIGIN);
 
@@ -133,12 +134,20 @@ void ApplicationSolar::renderPlanets() const {
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetAlpha"), mat->alpha);
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetRoughness"), mat->roughness);
 
-    glUniform1b(m_shaders.at("planet").u_locs.at("HasNormal"), i->hasNormal());
+    glUniform1b(m_shaders.at("planet").u_locs.at("HasNormal"), hasNormal);
 
     // bind the VAO to draw
     glBindVertexArray(planet_object.vertex_AO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, i->getTexId(0));
+    glUniform1i(m_shaders.at("planet").u_locs.at("planetTexture"), 0);
     // bind the specific texture
     glBindTexture(GL_TEXTURE_2D, texture);
+    if (hasNormal) {
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, i->getTexId(1));
+      glUniform1i(m_shaders.at("planet").u_locs.at("normalTexture"), 1);
+    }
     // draw bound vertex array using bound shader
     glDrawElements(planet_object.draw_mode, planet_object.num_elements, model::INDEX.type, NULL);
   }
@@ -408,7 +417,7 @@ void ApplicationSolar::initializeTextures() {
   for (auto i : m_geo) {
     NORMAL:
     auto path = m_resource_path + "textures/" + i->getParent()->getName() + ".png";
-    if (i->hasNormal() && extra == true) {
+    if (extra) {
       auto path = m_resource_path + "textures/" + i->getParent()->getName() + "Normal.png";
     }
     //storing the image in texture
@@ -507,7 +516,8 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["Cel"] = -1;
   m_shaders.at("planet").u_locs["Solid"] = -1;
   m_shaders.at("planet").u_locs["HasNormal"] = -1;
-
+  m_shaders.at("planet").u_locs["normalTexture"] = -1;
+  m_shaders.at("planet").u_locs["planetTexture"] = -1;
 
   m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});
