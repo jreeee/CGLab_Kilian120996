@@ -32,15 +32,20 @@ uniform sampler2D normalTexture;
 uniform bool  Cel;
 uniform bool  Solid;
 
-vec3 calculateNormal(vec3 CameraPosition, vec3 Normal, vec2 TexCoord) {
-  vec3 q0 = dFdx(CameraPosition.xyz);
-  vec3 q1 = dFdy(CameraPosition.xyz);
+vec3 calcNormal(vec3 Position, vec3 Normal, vec2 TexCoord) {
+  vec3 q0 = dFdx(Position.xyz);
+  vec3 q1 = dFdy(Position.xyz);
   vec2 st0 = dFdx(TexCoord.st);
   vec2 st1 = dFdy(TexCoord.st);
 
   vec3 S = normalize(q0 * st1.t - q1 * st0.t);
   vec3 T = normalize(-q0 * st1.s + q1 * st0.s);
   vec3 N = normalize(Normal);
+
+  if (dot(cross(S, T), N) < 0.0) {
+    S*= -1.0;
+    T *= -1.0;
+  }
 
   vec3 mapN = texture2D(normalTexture, TexCoord).xyz * 2.0 - 1.0;
   //mapN.xy = normalScale * mapN.xy
@@ -58,7 +63,7 @@ void main() {
 
   //diffuse as described in the slides
   //Cd (l - n) rho/PI
-  vec3 newNormal = (HasNormal) ? calculateNormal(CameraPosition, Normal, TexCoord) : Normal;
+  vec3 newNormal = (HasNormal) ? calcNormal(Position, Normal, TexCoord) : Normal;
   vec3 main_col = (Solid) ? PlanetColor : vec3(texture(planetTexture, TexCoord));
   vec3 diffuse = main_col * dot((light_dir) , newNormal) * 
                   (PlanetRoughness / PI);
@@ -81,5 +86,4 @@ void main() {
     phong = (dot(v, normalize(newNormal)) < 0.4) ? PlanetColor - 0.3f : ceil(phong * steps)/steps;
   }
   out_Color = vec4(phong, 1.0f);
-
 }
