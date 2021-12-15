@@ -36,7 +36,7 @@ const unsigned int ORBIT_POINTS = 100;
 const glm::fvec4 ORIGIN = {0.0f, 0.0f, 0.0f, 1.0f};
 const unsigned int COLOR_SEED = 3;
 const float SKYBOX_SIZE = 1000.0f;
-const float SUN_BRIGHTNESS = 10.0f;
+const float SUN_BRIGHTNESS = 4.5f;
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
@@ -100,7 +100,8 @@ void ApplicationSolar::renderPlanets() const {
 
     //setting the ambient intensity as the sun needs a higher one to shine
     float speed = m_scene_graph.getSpeed();
-    float intensity_a = (i->getName() == "Sun Geometry") ? ambient->getIntensity() * light->getIntensity() : ambient->getIntensity();
+    float intensity_a = (i->getName() == "Sun Geometry") ? ambient->getIntensity() * SUN_BRIGHTNESS : ambient->getIntensity();
+    float intensity_i = (i->getName() == "Sun Geometry") ? SUN_BRIGHTNESS : light->getIntensity();
     auto i_parent = i->getParent();
     auto mat = i->getMaterial();
     auto texture = i->getTexId(0);
@@ -130,7 +131,7 @@ void ApplicationSolar::renderPlanets() const {
     glUniform3fv(m_shaders.at("planet").u_locs.at("LightPosition"), 1, glm::value_ptr(l_pos));
     //floats
     glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), intensity_a);
-    glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light->getIntensity());
+    glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), intensity_i);
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetAlpha"), mat->alpha);
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetRoughness"), mat->roughness);
 
@@ -138,12 +139,16 @@ void ApplicationSolar::renderPlanets() const {
 
     // bind the VAO to draw
     glBindVertexArray(planet_object.vertex_AO);
+    //diffuse texture
     glActiveTexture(GL_TEXTURE0);
+    //uploading the texture
     glBindTexture(GL_TEXTURE_2D, i->getTexId(0));
+    //telling the shader where to look
     glUniform1i(m_shaders.at("planet").u_locs.at("planetTexture"), 0);
-    // bind the specific texture
+    // bind the specific texture, in this case the normal map
     glBindTexture(GL_TEXTURE_2D, texture);
     if (hasNormal) {
+      //same thing as b4
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, i->getTexId(1));
       glUniform1i(m_shaders.at("planet").u_locs.at("normalTexture"), 1);
@@ -168,7 +173,7 @@ void ApplicationSolar::renderOrbits() const {
     if (i->getName() == "Moon Orbit") {
       model_matrix = i->getWorldTransform();
       //cancelling out the rotation of the orbit
-      i->setLocalTransform(glm::rotate(i->getLocalTransform(), float(0.01f * i->getRot() + i->getSpin()), glm::fvec3{0.0f, 1.0f, 0.0f}));
+      i->setLocalTransform(glm::rotate(i->getLocalTransform(), float(0.01f * i->getRot() + i->getSpin()) * m_scene_graph.getSpeed(), glm::fvec3{0.0f, 1.0f, 0.0f}));
     }
     glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(model_matrix));
@@ -183,6 +188,7 @@ void ApplicationSolar::renderSkybox() const {
   glDepthMask(GL_FALSE);
   glBindVertexArray(skybox_object.vertex_AO);
   glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox_tex_id);
+  //the cube is rendered in Triangles and consists out of 36 points
   glDrawArrays(GL_TRIANGLES, 0, 36);
   glDepthMask(GL_TRUE);
 }
@@ -258,7 +264,7 @@ void ApplicationSolar::uploadUniforms() {
     //adding all the planet nodes
     Color sun_color = {0.1f, 0.5f, 0.3f};
     Color ambient_color = {1.0f, 1.0f, 1.0f};
-    auto sun = std::make_shared<PointLightNode>(root, "PointLight", sun_color, SUN_BRIGHTNESS);
+    auto sun = std::make_shared<PointLightNode>(root, "PointLight", sun_color, SUN_BRIGHTNESS * 10.0f);
     auto ambient =std::make_shared<PointLightNode>(root, "AmbientLight", ambient_color, 0.2f);
     auto mercury = std::make_shared<Node>(root, "Mercury");
     auto venus = std::make_shared<Node>(root, "Venus");
@@ -311,7 +317,6 @@ void ApplicationSolar::uploadUniforms() {
     venus->addChildren(m_geo[2]);
     earth->addChildren(m_geo[3]);
     m_geo[3]->addChildren(moon);
-    m_geo[4]->setNormal(true);
     moon->setParent(m_geo[3]);
     moon->addChildren(m_geo[4]);
     mars->addChildren(m_geo[5]);
@@ -339,6 +344,10 @@ void ApplicationSolar::uploadUniforms() {
       auto dist = m_orbit[i]->getDist();
       m_orbit[i]->setLocalTransform(glm::scale(m_orbit[i]->getLocalTransform(), glm::fvec3{dist, dist, dist}));
     }
+
+    //setting the normal(s), have to be set explicitly and require a "Planet"Normal.png to exist
+    m_geo[4]->setNormal(true);
+
     std::cout << m_scene_graph.printGraph();
   }
 
@@ -443,7 +452,7 @@ void ApplicationSolar::initializeTextures() {
 }
 
 void ApplicationSolar::initializeSkybox() {
-  
+  //saving all the points into the pos-vector
   std::vector<GLfloat> pos = {-SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE,
                               SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE,
                               SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE,
@@ -462,11 +471,13 @@ void ApplicationSolar::initializeSkybox() {
                               -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE,
                               SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE,
                               -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE };
-
+  //generating & binding the array
   glGenVertexArrays(1, &skybox_object.vertex_AO);
   glBindVertexArray(skybox_object.vertex_AO);
+  //same with buffers
   glGenBuffers(1, &skybox_object.vertex_BO);
   glBindBuffer(GL_ARRAY_BUFFER, skybox_object.vertex_BO);
+  //specifying how the data should be read
   glBufferData(GL_ARRAY_BUFFER, sizeof(float) * pos.size(), pos.data(), GL_STATIC_DRAW);
   glEnableVertexArrayAttrib(skybox_object.vertex_AO, 0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -474,6 +485,7 @@ void ApplicationSolar::initializeSkybox() {
   glGenTextures(1, &m_skybox_tex_id);
   glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox_tex_id);
 
+  //saving the textures in the skybox-vector
   std::vector<pixel_data> skybox;
   skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_r.png"));
   skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_l.png"));
@@ -482,10 +494,12 @@ void ApplicationSolar::initializeSkybox() {
   skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_f.png"));
   skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_d.png"));
 
+  //writing them into a cube map
   for (int i = 0; i < skybox.size(); ++i) {
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, skybox[i].channels, skybox[i].width, skybox[i].height, 0, skybox[i].channels, skybox[i].channel_type, skybox[i].ptr());
   }
 
+  //parameters for the cube map
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -521,13 +535,11 @@ void ApplicationSolar::initializeShaderPrograms() {
 
   m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});
-  // request uniform locations for shader program
   m_shaders.at("star").u_locs["ModelViewMatrix"] = -1;
   m_shaders.at("star").u_locs["ProjectionMatrix"] = -1;
 
   m_shaders.emplace("orbit", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/orbit.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});
-                                           // request uniform locations for shader program
   m_shaders.at("orbit").u_locs["ModelMatrix"] = -1;
   m_shaders.at("orbit").u_locs["ViewMatrix"] = -1;
   m_shaders.at("orbit").u_locs["ProjectionMatrix"] = -1;

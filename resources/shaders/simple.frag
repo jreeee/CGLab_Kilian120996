@@ -2,6 +2,7 @@
 
 #define PI 3.14159265359
 #define steps 4
+#define normal_factor 1
 
 #extension GL_OES_standard_derivatives : enable
 
@@ -33,24 +34,24 @@ uniform bool  Cel;
 uniform bool  Solid;
 
 vec3 calcNormal(vec3 Position, vec3 Normal, vec2 TexCoord) {
+  //getting the derivative of the vertex and texture
   vec3 q0 = dFdx(Position.xyz);
   vec3 q1 = dFdy(Position.xyz);
   vec2 st0 = dFdx(TexCoord.st);
   vec2 st1 = dFdy(TexCoord.st);
 
+  //setting the tangent space via S, T and N
   vec3 S = normalize(q0 * st1.t - q1 * st0.t);
   vec3 T = normalize(-q0 * st1.s + q1 * st0.s);
   vec3 N = normalize(Normal);
+  //saving it as a matrix
+  mat3 stn = mat3(S, T, N);
 
-  if (dot(cross(S, T), N) < 0.0) {
-    S*= -1.0;
-    T *= -1.0;
-  }
-
-  vec3 mapN = texture2D(normalTexture, TexCoord).xyz * 2.0 - 1.0;
-  //mapN.xy = normalScale * mapN.xy
-  mat3 tsn = mat3(S, T, N); //?
-  return normalize(tsn * mapN);
+  //getting the point on the normal map, since the rgb values can only
+  //be between 0 and 1 we have to subtract 1 for it to work
+  vec3 mapN = (texture2D(normalTexture, TexCoord).xyz * 2.0 - 1.0) * normal_factor;
+  //combining both into a modified normal that works in the world space
+  return normalize(stn * mapN);
 }
 
 void main() {
@@ -79,10 +80,10 @@ void main() {
   vec3 phong = ambient + beta * (diffuse + specular);
 
   //celshading works on the finished phong
-  if (Cel) {
-    //first we multiply phong by the step-count and cast the result to integers
-    //then we divide again to have the desired effect of low fidelity / cartoonish apperance
-    //outline that is a bit darker than the planet color
+  //first we multiply phong by the step-count and cast the result to integers
+  //then we divide again to have the desired effect of low fidelity / cartoonish apperance
+  //outline that is a bit darker than the orbit color
+if (Cel) {
     phong = (dot(v, normalize(newNormal)) < 0.4) ? PlanetColor - 0.3f : ceil(phong * steps)/steps;
   }
   out_Color = vec4(phong, 1.0f);
