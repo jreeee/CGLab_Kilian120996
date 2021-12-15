@@ -80,10 +80,18 @@ void GeometryNode::setMaterial(std::shared_ptr<Material> material) {
     material_ = material;
 }
 
-void GeometryNode::setTexId(unsigned int tex_id) {
-    tex_id_ = tex_id;
+void GeometryNode::setTexId(unsigned int id, unsigned int tex_id) {
+    tex_id_[id] = tex_id;
 }
 
-unsigned int GeometryNode::getTexId() const{
-    return tex_id_;
+unsigned int GeometryNode::getTexId(unsigned int id) const {
+    return tex_id_[id];
+}
+
+
+void GeometryNode::setNormal(bool normal) {
+    normal_ = normal;
+}
+bool GeometryNode::hasNormal() const {
+    return normal_;
 }

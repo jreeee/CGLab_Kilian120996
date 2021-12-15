@@ -103,7 +103,7 @@ void ApplicationSolar::renderPlanets() const {
     float intensity_a = (i->getName() == "Sun Geometry") ? ambient->getIntensity() * SUN_BRIGHTNESS : ambient->getIntensity();
     auto i_parent = i->getParent();
     auto mat = i->getMaterial();
-    auto texture = i->getTexId();
+    auto texture = i->getTexId(0);
     glm::vec3 l_pos(light->getWorldTransform() * ORIGIN);
     glm::vec3 c_pos(m_scene_graph.getCamera()->getWorldTransform() * ORIGIN);
 
@@ -132,6 +132,8 @@ void ApplicationSolar::renderPlanets() const {
     glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light->getIntensity());
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetAlpha"), mat->alpha);
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetRoughness"), mat->roughness);
+
+    glUniform1b(m_shaders.at("planet").u_locs.at("HasNormal"), i->hasNormal());
 
     // bind the VAO to draw
     glBindVertexArray(planet_object.vertex_AO);
@@ -300,6 +302,7 @@ void ApplicationSolar::uploadUniforms() {
     venus->addChildren(m_geo[2]);
     earth->addChildren(m_geo[3]);
     m_geo[3]->addChildren(moon);
+    m_geo[3]->setNormal(true);
     moon->setParent(m_geo[3]);
     moon->addChildren(m_geo[4]);
     mars->addChildren(m_geo[5]);
@@ -401,16 +404,21 @@ void ApplicationSolar::initializeOrbits() {
 
 void ApplicationSolar::initializeTextures() {
   //iterating over all planets
+  bool extra = false;
   for (auto i : m_geo) {
-    //getting the path
+    NORMAL:
     auto path = m_resource_path + "textures/" + i->getParent()->getName() + ".png";
+    if (i->hasNormal() && extra == true) {
+      auto path = m_resource_path + "textures/" + i->getParent()->getName() + "Normal.png";
+    }
     //storing the image in texture
     pixel_data texture = texture_loader::file(path);
     //initialiasing
     unsigned int texture_id;
     glGenTextures(1, &texture_id);
-    i->setTexId(texture_id);
+    (!extra) ? i->setTexId(0, texture_id) : i->setTexId(1, texture_id);
     glBindTexture(GL_TEXTURE_2D, texture_id);
+    
     //parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -419,6 +427,9 @@ void ApplicationSolar::initializeTextures() {
 
     glTexImage2D(GL_TEXTURE_2D, 0, texture.channels, texture.width, texture.height, 0, texture.channels, texture.channel_type, texture.ptr());
     glGenerateMipmap(GL_TEXTURE_2D);
+    extra = (i->hasNormal() && !extra) ? true : false;
+    
+    if (extra) goto NORMAL;
   }
 }
 
@@ -495,6 +506,7 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["CameraPosition"] = -1;
   m_shaders.at("planet").u_locs["Cel"] = -1;
   m_shaders.at("planet").u_locs["Solid"] = -1;
+  m_shaders.at("planet").u_locs["HasNormal"] = -1;
 
 
   m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},

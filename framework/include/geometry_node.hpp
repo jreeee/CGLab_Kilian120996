@@ -16,7 +16,8 @@ class GeometryNode : public Node {
         float rotation_;
         float distance_;
         float size_;
-        unsigned int tex_id_;
+        unsigned int tex_id_ [2];
+        bool normal_;
         std::shared_ptr<Material> material_;
 
     public:
@@ -51,9 +52,10 @@ class GeometryNode : public Node {
         float getSize() const;
         std::shared_ptr<Material> getMaterial() const;
         void setMaterial(std::shared_ptr<Material> material);
-        void setTexId(unsigned int tex_id);
-        unsigned int getTexId() const;
-
+        void setTexId(unsigned int id, unsigned int tex_id);
+        unsigned int getTexId(unsigned int id) const;
+        void setNormal(bool normal);
+        bool hasNormal() const;
 };
 
 #endif

@@ -22,6 +22,9 @@ uniform vec3  CameraPosition;
 
 uniform sampler2D planetTexture;
 
+//Normals
+uniform bool HasNormal;
+
 //used in the keyCallback
 uniform bool  Cel;
 uniform bool  Solid;

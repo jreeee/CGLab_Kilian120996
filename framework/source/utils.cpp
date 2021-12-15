@@ -142,7 +142,8 @@ glm::fmat4 calculate_projection_matrix(float aspect) {
   if (aspect < 1.0f) {
     fov_y = 2.0f * glm::atan(glm::tan(fov_y * 0.5f) * (1.0f / aspect));
   }
-  // projection is hor+ 
+  // projection is hor+
+  //last value sets the drawing distance
   return glm::perspective(fov_y, aspect, 0.1f, 5000.0f);
 }
 
