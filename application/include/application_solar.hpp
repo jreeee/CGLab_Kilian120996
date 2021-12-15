@@ -27,9 +27,10 @@ class ApplicationSolar : public Application {
   void render() const;
 
   //render a planet
-  void renderPlanet() const;
+  void renderPlanets() const;
   void renderStars() const;
   void renderOrbits() const;
+  void renderSkybox() const;
 
  protected:
   void initializeScreenGraph();
@@ -50,11 +51,15 @@ class ApplicationSolar : public Application {
   model_object planet_object;
   model_object star_object;
   model_object orbit_object;
+  model_object skybox_object;
   
   // scene graph
   SceneGraph m_scene_graph;
   std::vector<std::shared_ptr<GeometryNode>> m_geo;
   std::vector<std::shared_ptr<GeometryNode>> m_orbit;
+
+  // other stuff
+  unsigned int m_skybox_tex_id;
 };
 
 #endif

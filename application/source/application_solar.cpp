@@ -42,6 +42,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,planet_object{}
  ,star_object{}
  ,orbit_object{}
+ ,skybox_object{}
  ,m_scene_graph {}
 {
   initializeScreenGraph();
@@ -58,6 +59,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   initializeStars();
   initializeOrbits();
   initializeTextures();
+  initializeSkybox();
   initializeShaderPrograms();
 }
 
@@ -68,20 +70,23 @@ ApplicationSolar::~ApplicationSolar() {
   glDeleteBuffers(1, &star_object.element_BO);
   glDeleteBuffers(1, &orbit_object.vertex_BO);
   glDeleteBuffers(1, &orbit_object.element_BO);
+  glDeleteBuffers(1, &skybox_object.vertex_BO);
   glDeleteVertexArrays(1, &planet_object.vertex_AO);
   glDeleteVertexArrays(1, &star_object.vertex_AO);
   glDeleteVertexArrays(1, &orbit_object.vertex_AO);
+  glDeleteVertexArrays(1, &skybox_object.vertex_AO);
 }
 
 void ApplicationSolar::render() const { 
   //including the planets since they should also be displayed
   renderStars();
   renderOrbits();
-  renderPlanet();
+  renderPlanets();
+  renderSkybox();
 }
 
 
-void ApplicationSolar::renderPlanet() const {
+void ApplicationSolar::renderPlanets() const {
   //getting pointers to the light nodes
   auto light = std::dynamic_pointer_cast<PointLightNode>(m_scene_graph.getRoot()->getChildren("PointLight"));
   auto ambient = std::dynamic_pointer_cast<PointLightNode>(m_scene_graph.getRoot()->getChildren("AmbientLight"));
@@ -161,6 +166,14 @@ void ApplicationSolar::renderOrbits() const {
     glDrawArrays(orbit_object.draw_mode, 0, orbit_object.num_elements);
   }
 }
+void ApplicationSolar::renderSkybox() const {
+  glUseProgram(m_shaders.at("skybox").handle);
+  glDepthMask(GL_FALSE);
+  glBindVertexArray(skybox_object.vertex_AO);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox_tex_id);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
+  glDepthMask(GL_TRUE);
+}
 
 void ApplicationSolar::uploadView() {
   // vertices are transformed in camera space, so camera transform must be inverted
@@ -175,6 +188,9 @@ void ApplicationSolar::uploadView() {
   glUseProgram(m_shaders.at("orbit").handle);
   glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ViewMatrix"),
                      1, GL_FALSE, glm::value_ptr(view_matrix));
+  glUseProgram(m_shaders.at("skybox").handle);
+  glUniformMatrix4fv(m_shaders.at("skybox").u_locs.at("ViewMatrix"),
+                      1, GL_FALSE, glm::value_ptr(view_matrix));
 }
 
 void ApplicationSolar::uploadProjection() {
@@ -189,6 +205,9 @@ void ApplicationSolar::uploadProjection() {
                      1, GL_FALSE, glm::value_ptr(camera_proj));
   glUseProgram(m_shaders.at("orbit").handle);
   glUniformMatrix4fv(m_shaders.at("orbit").u_locs.at("ProjectionMatrix"),
+                     1, GL_FALSE, glm::value_ptr(camera_proj));
+  glUseProgram(m_shaders.at("skybox").handle);
+  glUniformMatrix4fv(m_shaders.at("skybox").u_locs.at("ProjectionMatrix"),
                      1, GL_FALSE, glm::value_ptr(camera_proj));
 }
 
@@ -403,14 +422,28 @@ void ApplicationSolar::initializeTextures() {
 }
 
 void ApplicationSolar::initializeSkybox() {
+  unsigned int test;
+  glGenTextures(1, &test);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, test);
   std::vector<pixel_data> skybox;
-  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_t"));
-  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_l"));
-  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_f"));
-  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_r"));
-  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_d"));
-  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_b"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_r.png"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_l.png"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_t.png"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_b.png"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_d.png"));
+  skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_f.png"));
 
+  for (int i = 0; i < skybox.size(); ++i) {
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, skybox[i].channels, skybox[i].width, skybox[i].height, 0, skybox[i].channels, skybox[i].channel_type, skybox[i].ptr());
+  }
+
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+  m_skybox_tex_id = test;
 }
 
 // load shader sources
@@ -449,7 +482,11 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("orbit").u_locs["ViewMatrix"] = -1;
   m_shaders.at("orbit").u_locs["ProjectionMatrix"] = -1;
   m_shaders.at("orbit").u_locs["in_Color"] = -1;
- 
+
+  m_shaders.emplace("skybox", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/skybox.vert"},
+                                           {GL_FRAGMENT_SHADER, m_resource_path + "shaders/skybox.frag"}}});
+  m_shaders.at("skybox").u_locs["ProjectionMatrix"] = -1;
+  m_shaders.at("skybox").u_locs["ViewMatrix"] = -1;
 }
 
 // load models
