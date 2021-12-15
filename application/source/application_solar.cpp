@@ -36,6 +36,7 @@ const unsigned int ORBIT_POINTS = 100;
 const glm::fvec4 ORIGIN = {0.0f, 0.0f, 0.0f, 1.0f};
 const float SUN_BRIGHTNESS = 30.0f;
 const unsigned int COLOR_SEED = 3;
+const float SKYBOX_SIZE = 500.0f;
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
@@ -422,9 +423,37 @@ void ApplicationSolar::initializeTextures() {
 }
 
 void ApplicationSolar::initializeSkybox() {
-  unsigned int test;
-  glGenTextures(1, &test);
-  glBindTexture(GL_TEXTURE_CUBE_MAP, test);
+  
+  std::vector<GLfloat> pos = {-SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE,
+                              SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE,
+                              SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE,
+                              -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE,
+                              -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE,
+                              -SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE,
+                              SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE,
+                              SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE,
+                              SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE,
+                              -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE,
+                              SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE,
+                              SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE,
+                              -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE,
+                              SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE,
+                              -SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE,
+                              -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE,
+                              SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, -SKYBOX_SIZE,
+                              -SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE, SKYBOX_SIZE, -SKYBOX_SIZE, SKYBOX_SIZE };
+
+  glGenVertexArrays(1, &skybox_object.vertex_AO);
+  glBindVertexArray(skybox_object.vertex_AO);
+  glGenBuffers(1, &skybox_object.vertex_BO);
+  glBindBuffer(GL_ARRAY_BUFFER, skybox_object.vertex_BO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float) * pos.size(), pos.data(), GL_STATIC_DRAW);
+  glEnableVertexArrayAttrib(skybox_object.vertex_AO, 0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+  glGenTextures(1, &m_skybox_tex_id);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, m_skybox_tex_id);
+
   std::vector<pixel_data> skybox;
   skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_r.png"));
   skybox.push_back(texture_loader::file(m_resource_path + "textures/sb_l.png"));
@@ -443,7 +472,7 @@ void ApplicationSolar::initializeSkybox() {
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
   glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-  m_skybox_tex_id = test;
+
 }
 
 // load shader sources
