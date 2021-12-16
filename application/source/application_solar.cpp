@@ -119,8 +119,6 @@ void ApplicationSolar::renderPlanets() const {
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(i->getWorldTransform()));
 
-    glUniform1b(m_shaders.at("planet").u_locs.at("Sun"), (i->getName() == "Sun Geometry"));
-
     //all the colors
     glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), mat->diffuse->r, mat->diffuse->g, mat->diffuse->b);
     glUniform3f(m_shaders.at("planet").u_locs.at("AmbientColor"), ambient->getLightColor().r, ambient->getLightColor().g, ambient->getLightColor().b);
@@ -130,7 +128,7 @@ void ApplicationSolar::renderPlanets() const {
     glUniform3fv(m_shaders.at("planet").u_locs.at("CameraPosition"), 1, glm::value_ptr(c_pos));
     glUniform3fv(m_shaders.at("planet").u_locs.at("LightPosition"), 1, glm::value_ptr(l_pos));
     //floats
-    glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), ambient->getIntensity());
+    glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), (i->getName() == "Sun Geometry") ? light->getIntensity() : ambient->getIntensity());
     glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light->getIntensity());
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetAlpha"), mat->alpha);
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetRoughness"), mat->roughness);
@@ -532,7 +530,6 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["HasNormal"] = -1;
   m_shaders.at("planet").u_locs["normalTexture"] = -1;
   m_shaders.at("planet").u_locs["planetTexture"] = -1;
-  m_shaders.at("planet").u_locs["Sun"] = -1;
 
   m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});

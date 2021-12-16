@@ -20,7 +20,6 @@ uniform float PlanetRoughness;
 uniform vec3  PlanetSpecular;
 uniform float PlanetAlpha;
 uniform vec3  CameraPosition;
-uniform bool  Sun;
 
 uniform sampler2D planetTexture;
 
@@ -54,9 +53,6 @@ vec3 calcNormal(vec3 Position, vec3 Normal, vec2 TexCoord) {
 }
 
 void main() {
-  if (Sun) {
-    out_Color = vec4(texture(planetTexture, TexCoord));
-  }
   //ambient
   //beta(Y,X) = (lcol *lint)/(4PI (Y-X)^2)
   vec3 light_dir = LightPosition - Position;
@@ -79,13 +75,17 @@ void main() {
   vec3 specular = PlanetSpecular * pow(max(dot(h, normalize(newNormal)),
                                                0.0f), 4 * PlanetAlpha);
 
-  vec3 phong = ambient + beta * (diffuse + specular);
-
+  //checking if the object is the sun
+  //technically we could skip most of the steps above 
+  //however this still enables celshading and is rather convenient
+  vec3 phong = (AmbientIntensity == LightIntensity) ? 
+                main_col : ambient + beta * (diffuse + specular);
+  
   //celshading works on the finished phong
   //first we multiply phong by the step-count and cast the result to integers
   //then we divide again to have the desired effect of low fidelity / cartoonish apperance
   //outline that is a bit darker than the orbit color
-if (Cel) {
+  if (Cel) {
     phong = (dot(v, normalize(newNormal)) < 0.4) ? PlanetColor - 0.3f : ceil(phong * steps)/steps;
   }
   out_Color = vec4(phong, 1.0f);
