@@ -4,8 +4,6 @@
 #define steps 4
 #define normal_factor 1
 
-#extension GL_OES_standard_derivatives : enable
-
 in  vec3 Position;
 in  vec3 Normal;
 in  vec2 TexCoord;
@@ -22,6 +20,7 @@ uniform float PlanetRoughness;
 uniform vec3  PlanetSpecular;
 uniform float PlanetAlpha;
 uniform vec3  CameraPosition;
+uniform bool  Sun;
 
 uniform sampler2D planetTexture;
 
@@ -55,6 +54,9 @@ vec3 calcNormal(vec3 Position, vec3 Normal, vec2 TexCoord) {
 }
 
 void main() {
+  if (Sun) {
+    out_Color = vec4(texture(planetTexture, TexCoord));
+  }
   //ambient
   //beta(Y,X) = (lcol *lint)/(4PI (Y-X)^2)
   vec3 light_dir = LightPosition - Position;

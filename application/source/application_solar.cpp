@@ -100,8 +100,6 @@ void ApplicationSolar::renderPlanets() const {
 
     //setting the ambient intensity as the sun needs a higher one to shine
     float speed = m_scene_graph.getSpeed();
-    float intensity_a = (i->getName() == "Sun Geometry") ? ambient->getIntensity() * SUN_BRIGHTNESS : ambient->getIntensity();
-    float intensity_i = (i->getName() == "Sun Geometry") ? SUN_BRIGHTNESS : light->getIntensity();
     auto i_parent = i->getParent();
     auto mat = i->getMaterial();
     auto texture = i->getTexId(0);
@@ -121,6 +119,8 @@ void ApplicationSolar::renderPlanets() const {
     glUniformMatrix4fv(m_shaders.at("planet").u_locs.at("ModelMatrix"),
                       1, GL_FALSE, glm::value_ptr(i->getWorldTransform()));
 
+    glUniform1b(m_shaders.at("planet").u_locs.at("Sun"), (i->getName() == "Sun Geometry"));
+
     //all the colors
     glUniform3f(m_shaders.at("planet").u_locs.at("PlanetColor"), mat->diffuse->r, mat->diffuse->g, mat->diffuse->b);
     glUniform3f(m_shaders.at("planet").u_locs.at("AmbientColor"), ambient->getLightColor().r, ambient->getLightColor().g, ambient->getLightColor().b);
@@ -130,8 +130,8 @@ void ApplicationSolar::renderPlanets() const {
     glUniform3fv(m_shaders.at("planet").u_locs.at("CameraPosition"), 1, glm::value_ptr(c_pos));
     glUniform3fv(m_shaders.at("planet").u_locs.at("LightPosition"), 1, glm::value_ptr(l_pos));
     //floats
-    glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), intensity_a);
-    glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), intensity_i);
+    glUniform1f(m_shaders.at("planet").u_locs.at("AmbientIntensity"), ambient->getIntensity());
+    glUniform1f(m_shaders.at("planet").u_locs.at("LightIntensity"), light->getIntensity());
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetAlpha"), mat->alpha);
     glUniform1f(m_shaders.at("planet").u_locs.at("PlanetRoughness"), mat->roughness);
 
@@ -251,7 +251,7 @@ void ApplicationSolar::uploadUniforms() {
         col.push_back(float(std::rand()%256)/255);
       }
       //creating the material
-      mats.push_back(std::make_shared<Material>(std::make_shared<Color>(col[0], col[1], col[2]), spec, 40.0f, 5.0f));
+      mats.push_back(std::make_shared<Material>(std::make_shared<Color>(col[0], col[1], col[2]), spec, 5.0f, 30.0f));
     }
     
     auto mdl_ptr = std::make_shared<model>();
@@ -262,9 +262,9 @@ void ApplicationSolar::uploadUniforms() {
     m_scene_graph = SceneGraph("Solar System Scene Graph", root);
 
     //adding all the planet nodes
-    Color sun_color = {0.1f, 0.5f, 0.3f};
+    Color sun_color = {1.0f, 1.0f, 1.0f};
     Color ambient_color = {1.0f, 1.0f, 1.0f};
-    auto sun = std::make_shared<PointLightNode>(root, "PointLight", sun_color, SUN_BRIGHTNESS * 10.0f);
+    auto sun = std::make_shared<PointLightNode>(root, "PointLight", sun_color, SUN_BRIGHTNESS);
     auto ambient =std::make_shared<PointLightNode>(root, "AmbientLight", ambient_color, 0.2f);
     auto mercury = std::make_shared<Node>(root, "Mercury");
     auto venus = std::make_shared<Node>(root, "Venus");
@@ -532,6 +532,7 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.at("planet").u_locs["HasNormal"] = -1;
   m_shaders.at("planet").u_locs["normalTexture"] = -1;
   m_shaders.at("planet").u_locs["planetTexture"] = -1;
+  m_shaders.at("planet").u_locs["Sun"] = -1;
 
   m_shaders.emplace("star", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/vao.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/vao.frag"}}});
