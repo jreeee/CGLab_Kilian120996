@@ -85,22 +85,24 @@ ApplicationSolar::~ApplicationSolar() {
   glDeleteVertexArrays(1, &skybox_object.vertex_AO);
   glDeleteVertexArrays(1, &quad_object.vertex_AO);
   glDeleteFramebuffers(1, &m_fbo);
+  glDeleteRenderbuffers(1, &m_rbo);
   glDeleteTextures(1, &m_tex[0]);
   glDeleteTextures(1, &m_tex[1]);
 }
 
-void ApplicationSolar::render() const { 
+void ApplicationSolar::render() const {
+  //binding the framebuffer and clearing it
   glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+  //displaying objects as they are and not depending on when they are rendered
   glEnable(GL_DEPTH_TEST);
-
+  //rendering the scene
   renderStars();
   renderOrbits();
   renderPlanets();
   renderSkybox();
-
+  //finishing the framebuffer
   renderFramebuffer();
 }
 
@@ -199,6 +201,7 @@ void ApplicationSolar::renderOrbits() const {
     glDrawArrays(orbit_object.draw_mode, 0, orbit_object.num_elements);
   }
 }
+
 void ApplicationSolar::renderSkybox() const {
   glUseProgram(m_shaders.at("skybox").handle);
   glDepthMask(GL_FALSE);
@@ -210,14 +213,18 @@ void ApplicationSolar::renderSkybox() const {
 }
 
 void ApplicationSolar::renderFramebuffer() const {
+  //setting the framebuffer as the default one and clearing it
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f); 
   glClear(GL_COLOR_BUFFER_BIT);
+  //this has to do with how the effects are being handeled
   glUseProgram(m_shaders.at("fbo").handle);
   glUniform1i(m_shaders.at("fbo").u_locs.at("Sfx"), m_sfx);
+  //using the quad to draw the framebuffer onto it
   glBindVertexArray(quad_object.vertex_AO);
+  //not needed anymore so we can disable it
   glDisable(GL_DEPTH_TEST);
-  glActiveTexture(GL_TEXTURE0);
+  //binding the texture to the quad and drawing it to the screen
   glBindTexture(GL_TEXTURE_2D, m_tex[0]);
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
@@ -627,38 +634,43 @@ void ApplicationSolar::initializeGeometry(std::string const& path) {
 }
 
 void ApplicationSolar::initializeFramebuffer() {
+  //checking if we need to (re)calculate the framebuffer
   if ( ! glIsFramebuffer(m_fbo)) {
     glGenFramebuffers(1, &m_fbo);
     glGenTextures(1, &m_tex[0]);
     glGenRenderbuffers(1, &m_rbo);
   }
+  //binding the framebuffer and texture
   glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
   glBindTexture(GL_TEXTURE_2D, m_tex[0]);
-
+  //generating the texture
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_screen_width, m_screen_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glBindTexture(GL_TEXTURE_2D, 0);
-
+  //attaching the texture to the framebuffer
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tex[0], 0);
-
+  //binding the renderbuffer
   glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, m_screen_width, m_screen_height);
   glBindRenderbuffer(GL_RENDERBUFFER, 0);
+  //attaching the renderbuffer
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
-
+  //making sure everything went well
   assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);   
 }
 
 void ApplicationSolar::initializeQuad() {
+  //coordinates of the quad
   std::vector<GLfloat> pos = {-1.0f,  1.0f,   0.0f,   1.0f,
                               -1.0f,  -1.0f,  0.0f,   0.0f,
                               1.0f,   -1.0f,  1.0f,   0.0f,
                               -1.0f,  1.0f,   0.0f,   1.0f,
                               1.0f,   -1.0f,  1.0f,   0.0f,
                               1.0f,   1.0f,   1.0f,   1.0f};
+  //generating and binding a VA as with all the other objects
   glGenVertexArrays(1, &quad_object.vertex_AO);
   glBindVertexArray(quad_object.vertex_AO);
 
@@ -668,7 +680,7 @@ void ApplicationSolar::initializeQuad() {
   //position information via attributes
   glEnableVertexArrayAttrib(quad_object.vertex_AO, 0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
-
+  //texture coordinate information via attributes
   glEnableVertexArrayAttrib(quad_object.vertex_AO, 1);
   glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float)*2));
   
@@ -718,6 +730,12 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
   else if (key == GLFW_KEY_6 && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_scene_graph.setSpeed(m_scene_graph.getSpeed() - 0.1f);
   }
+  /*
+  the following might look a bit cryptic but is actually quite simple:
+  openGL wuoldn't let me upload four uniform bools so i now use one int instead
+  this works by relying on prime numbers and their cool propreties and is kinda
+  like a fancy bitmask (which i originally wanted to to but found this simpler)
+  */
   else if (key == GLFW_KEY_7 && action == GLFW_PRESS) {
     m_sfx = (m_sfx % 2 == 0) ? m_sfx / 2 : m_sfx * 2;    
   }
