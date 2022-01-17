@@ -637,10 +637,21 @@ void ApplicationSolar::initializeGeometry(std::string const& path) {
 }
 
 void ApplicationSolar::initializeFramebuffer() {
-  glGenFramebuffers(1, &m_fbo);
+  if ( ! glIsFramebuffer(m_fbo)) {
+    glGenFramebuffers(1, &m_fbo);
+    glGenTextures(1, &m_tex);
+  }
   glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+  glBindTexture(GL_TEXTURE_2D, m_tex);
 
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_screen_width, m_screen_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tex, 0);
+  assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);   
 }
 
