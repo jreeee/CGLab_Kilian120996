@@ -42,7 +42,7 @@ class ApplicationSolar : public Application {
   void initializeSkybox();
   void initializeShaderPrograms();
   void initializeGeometry(std::string const& path);
-  void initializeFramebuffer();
+  void initializeFramebuffer(bool resize);
   void initializeQuad();
   // update uniform values
   void uploadUniforms();
@@ -68,6 +68,7 @@ class ApplicationSolar : public Application {
   unsigned int m_screen_width;
   unsigned int m_tex[2];
   unsigned int m_fbo;
+  unsigned int m_rbo;
 };
 
 #endif

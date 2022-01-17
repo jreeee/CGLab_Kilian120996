@@ -65,7 +65,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   initializeTextures();
   initializeSkybox();
   initializeShaderPrograms();
-  initializeFramebuffer();
+  initializeFramebuffer(false);
   initializeQuad();
 }
 
@@ -99,6 +99,7 @@ void ApplicationSolar::render() const {
   renderOrbits();
   renderPlanets();
   renderSkybox();
+
   renderFramebuffer();
 }
 
@@ -214,6 +215,7 @@ void ApplicationSolar::renderFramebuffer() const {
   glUseProgram(m_shaders.at("fbo").handle);
   glBindVertexArray(quad_object.vertex_AO);
   glDisable(GL_DEPTH_TEST);
+  glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, m_tex[0]);
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
@@ -621,9 +623,13 @@ void ApplicationSolar::initializeGeometry(std::string const& path) {
   planet_object.num_elements = GLsizei(planet_model.indices.size());
 }
 
-void ApplicationSolar::initializeFramebuffer() {
+void ApplicationSolar::initializeFramebuffer(bool resize) {
   if ( ! glIsFramebuffer(m_fbo)) {
     glGenFramebuffers(1, &m_fbo);
+    glGenTextures(1, &m_tex[0]);
+    glGenRenderbuffers(1, &m_rbo);
+  }
+  else if (resize) {
     glGenTextures(1, &m_tex[0]);
   }
   glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
@@ -636,6 +642,12 @@ void ApplicationSolar::initializeFramebuffer() {
   glBindTexture(GL_TEXTURE_2D, 0);
 
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tex[0], 0);
+
+  glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+  glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, m_screen_width, m_screen_height);
+  glBindRenderbuffer(GL_RENDERBUFFER, 0);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
+
   assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);   
 }
@@ -748,7 +760,7 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
   uploadProjection();
   m_screen_height = height;
   m_screen_width = width;
-  initializeFramebuffer();
+  initializeFramebuffer(true);
 }
 
 
