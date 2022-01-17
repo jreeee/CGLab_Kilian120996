@@ -36,7 +36,7 @@ const unsigned int ORBIT_POINTS = 100;
 const glm::fvec4 ORIGIN = {0.0f, 0.0f, 0.0f, 1.0f};
 const unsigned int COLOR_SEED = 3;
 const float SKYBOX_SIZE = 1000.0f;
-const float SUN_BRIGHTNESS = 4.5f;
+const float SUN_BRIGHTNESS = 5.5f;
 
 ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  :Application{resource_path}
@@ -48,6 +48,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
  ,m_scene_graph {}
  ,m_screen_height{initial_resolution.x}
  ,m_screen_width{initial_resolution.y}
+ ,m_sfx{1}
 {
   initializeScreenGraph();
 
@@ -65,7 +66,7 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   initializeTextures();
   initializeSkybox();
   initializeShaderPrograms();
-  initializeFramebuffer(false);
+  initializeFramebuffer();
   initializeQuad();
 }
 
@@ -213,6 +214,7 @@ void ApplicationSolar::renderFramebuffer() const {
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f); 
   glClear(GL_COLOR_BUFFER_BIT);
   glUseProgram(m_shaders.at("fbo").handle);
+  glUniform1i(m_shaders.at("fbo").u_locs.at("Sfx"), m_sfx);
   glBindVertexArray(quad_object.vertex_AO);
   glDisable(GL_DEPTH_TEST);
   glActiveTexture(GL_TEXTURE0);
@@ -580,6 +582,7 @@ void ApplicationSolar::initializeShaderPrograms() {
   m_shaders.emplace("fbo", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/fbo.vert"},
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/fbo.frag"}}});
   m_shaders.at("fbo").u_locs["texFramebuffer"] = -1;
+  m_shaders.at("fbo").u_locs["Sfx"] = -1;
 }
 
 // load models
@@ -623,14 +626,11 @@ void ApplicationSolar::initializeGeometry(std::string const& path) {
   planet_object.num_elements = GLsizei(planet_model.indices.size());
 }
 
-void ApplicationSolar::initializeFramebuffer(bool resize) {
+void ApplicationSolar::initializeFramebuffer() {
   if ( ! glIsFramebuffer(m_fbo)) {
     glGenFramebuffers(1, &m_fbo);
     glGenTextures(1, &m_tex[0]);
     glGenRenderbuffers(1, &m_rbo);
-  }
-  else if (resize) {
-    glGenTextures(1, &m_tex[0]);
   }
   glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
   glBindTexture(GL_TEXTURE_2D, m_tex[0]);
@@ -718,6 +718,18 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
   else if (key == GLFW_KEY_6 && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
     m_scene_graph.setSpeed(m_scene_graph.getSpeed() - 0.1f);
   }
+  else if (key == GLFW_KEY_7 && action == GLFW_PRESS) {
+    m_sfx = (m_sfx % 2 == 0) ? m_sfx / 2 : m_sfx * 2;    
+  }
+  else if (key == GLFW_KEY_8 && action == GLFW_PRESS) {
+    m_sfx = (m_sfx % 3 == 0) ? m_sfx / 3 : m_sfx * 3;
+  }
+  else if (key == GLFW_KEY_9 && action == GLFW_PRESS) {
+    m_sfx = (m_sfx % 5 == 0) ? m_sfx / 5 : m_sfx * 5;
+  }
+  else if (key == GLFW_KEY_0 && action == GLFW_PRESS) {
+    m_sfx = (m_sfx % 7 == 0) ? m_sfx / 7 : m_sfx * 7;
+  }
   else if (key == GLFW_KEY_RIGHT && action == GLFW_PRESS) {
     initializeGeometry(m_resource_path + "models/sphere.obj");
   }
@@ -760,7 +772,7 @@ void ApplicationSolar::resizeCallback(unsigned width, unsigned height) {
   uploadProjection();
   m_screen_height = height;
   m_screen_width = width;
-  initializeFramebuffer(true);
+  initializeFramebuffer();
 }
 
 
