@@ -93,7 +93,7 @@ void ApplicationSolar::render() const {
   glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  //glEnable(GL_DEPTH_TEST);
+  glEnable(GL_DEPTH_TEST);
 
   renderStars();
   renderOrbits();
@@ -213,7 +213,7 @@ void ApplicationSolar::renderFramebuffer() const {
   glClear(GL_COLOR_BUFFER_BIT);
   glUseProgram(m_shaders.at("fbo").handle);
   glBindVertexArray(quad_object.vertex_AO);
-  //glDisable(GL_DEPTH_TEST);
+  glDisable(GL_DEPTH_TEST);
   glBindTexture(GL_TEXTURE_2D, m_tex[0]);
   glDrawArrays(GL_TRIANGLES, 0, 6);
 }
@@ -574,6 +574,10 @@ void ApplicationSolar::initializeShaderPrograms() {
                                            {GL_FRAGMENT_SHADER, m_resource_path + "shaders/skybox.frag"}}});
   m_shaders.at("skybox").u_locs["ProjectionMatrix"] = -1;
   m_shaders.at("skybox").u_locs["ViewMatrix"] = -1;
+
+  m_shaders.emplace("fbo", shader_program{{{GL_VERTEX_SHADER,m_resource_path + "shaders/fbo.vert"},
+                                           {GL_FRAGMENT_SHADER, m_resource_path + "shaders/fbo.frag"}}});
+  m_shaders.at("fbo").u_locs["texFramebuffer"] = -1;
 }
 
 // load models
@@ -646,15 +650,15 @@ void ApplicationSolar::initializeQuad() {
   glGenVertexArrays(1, &quad_object.vertex_AO);
   glBindVertexArray(quad_object.vertex_AO);
 
-  glGenBuffers(GLuint(1), &quad_object.vertex_BO);
+  glGenBuffers(1, &quad_object.vertex_BO);
   glBindBuffer(GL_ARRAY_BUFFER, quad_object.vertex_BO);
   glBufferData(GL_ARRAY_BUFFER, sizeof(float)*pos.size(), pos.data(), GL_STATIC_DRAW);
   //position information via attributes
   glEnableVertexArrayAttrib(quad_object.vertex_AO, 0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
 
-  glEnableVertexArrayAttrib(quad_object.vertex_AO, 0);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float)*2));
+  glEnableVertexArrayAttrib(quad_object.vertex_AO, 1);
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float)*2));
   
   //setting the draw mode
   quad_object.draw_mode = GL_TRIANGLE_STRIP;
