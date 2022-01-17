@@ -31,6 +31,8 @@ class ApplicationSolar : public Application {
   void renderStars() const;
   void renderOrbits() const;
   void renderSkybox() const;
+  void renderFramebuffer() const;
+
 
  protected:
   void initializeScreenGraph();
@@ -40,6 +42,7 @@ class ApplicationSolar : public Application {
   void initializeSkybox();
   void initializeShaderPrograms();
   void initializeGeometry(std::string const& path);
+  void initializeFramebuffer();
   // update uniform values
   void uploadUniforms();
   // upload projection matrix
@@ -52,6 +55,7 @@ class ApplicationSolar : public Application {
   model_object star_object;
   model_object orbit_object;
   model_object skybox_object;
+  model_object quad_object;
   
   // scene graph
   SceneGraph m_scene_graph;
@@ -59,7 +63,10 @@ class ApplicationSolar : public Application {
   std::vector<std::shared_ptr<GeometryNode>> m_orbit;
 
   // other stuff
-  unsigned int m_skybox_tex_id;
+  unsigned int m_screen_height;
+  unsigned int m_screen_width;
+  unsigned int m_tex;
+  unsigned int m_fbo;
 };
 
 #endif
