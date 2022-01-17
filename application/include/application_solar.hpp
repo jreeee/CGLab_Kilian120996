@@ -43,6 +43,7 @@ class ApplicationSolar : public Application {
   void initializeShaderPrograms();
   void initializeGeometry(std::string const& path);
   void initializeFramebuffer();
+  void initializeQuad();
   // update uniform values
   void uploadUniforms();
   // upload projection matrix
@@ -65,7 +66,7 @@ class ApplicationSolar : public Application {
   // other stuff
   unsigned int m_screen_height;
   unsigned int m_screen_width;
-  unsigned int m_tex;
+  unsigned int m_tex[2];
   unsigned int m_fbo;
 };
 

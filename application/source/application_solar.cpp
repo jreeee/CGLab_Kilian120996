@@ -65,6 +65,8 @@ ApplicationSolar::ApplicationSolar(std::string const& resource_path)
   initializeTextures();
   initializeSkybox();
   initializeShaderPrograms();
+  initializeFramebuffer();
+  initializeQuad();
 }
 
 ApplicationSolar::~ApplicationSolar() {
@@ -82,11 +84,17 @@ ApplicationSolar::~ApplicationSolar() {
   glDeleteVertexArrays(1, &skybox_object.vertex_AO);
   glDeleteVertexArrays(1, &quad_object.vertex_AO);
   glDeleteFramebuffers(1, &m_fbo);
-  glDeleteTextures(1, &m_tex);
+  glDeleteTextures(1, &m_tex[0]);
+  glDeleteTextures(1, &m_tex[1]);
 }
 
-void ApplicationSolar::render() { 
-  //including the planets since they should also be displayed
+void ApplicationSolar::render() const { 
+  glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
+  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  //glEnable(GL_DEPTH_TEST);
+
   renderStars();
   renderOrbits();
   renderPlanets();
@@ -95,7 +103,7 @@ void ApplicationSolar::render() {
 }
 
 
-void ApplicationSolar::renderPlanets() {
+void ApplicationSolar::renderPlanets() const {
   //getting pointers to the light nodes
   auto light = std::dynamic_pointer_cast<PointLightNode>(m_scene_graph.getRoot()->getChildren("PointLight"));
   auto ambient = std::dynamic_pointer_cast<PointLightNode>(m_scene_graph.getRoot()->getChildren("AmbientLight"));
@@ -164,7 +172,7 @@ void ApplicationSolar::renderPlanets() {
   }
 }
 
-void ApplicationSolar::renderStars() {
+void ApplicationSolar::renderStars() const {
   //doing essentially the same as with the planets but since they don't move we don't need special matrices
   //and due to the fact that they are stored in an Array we can just use glDrawArray to do that
   glUseProgram(m_shaders.at("star").handle);
@@ -172,7 +180,7 @@ void ApplicationSolar::renderStars() {
   glDrawArrays(star_object.draw_mode, 0, star_object.num_elements);
 }
 
-void ApplicationSolar::renderOrbits() {
+void ApplicationSolar::renderOrbits() const {
   for (auto i : m_orbit) {
     glUseProgram(m_shaders.at("orbit").handle);
     auto model_matrix = i->getLocalTransform();
@@ -189,53 +197,25 @@ void ApplicationSolar::renderOrbits() {
     glDrawArrays(orbit_object.draw_mode, 0, orbit_object.num_elements);
   }
 }
-void ApplicationSolar::renderSkybox() {
+void ApplicationSolar::renderSkybox() const {
   glUseProgram(m_shaders.at("skybox").handle);
   glDepthMask(GL_FALSE);
   glBindVertexArray(skybox_object.vertex_AO);
-  glBindTexture(GL_TEXTURE_CUBE_MAP, m_tex);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, m_tex[1]);
   //the cube is rendered in Triangles and consists out of 36 points
   glDrawArrays(GL_TRIANGLES, 0, 36);
   glDepthMask(GL_TRUE);
 }
 
-void ApplicationSolar::renderFramebuffer() {
-  //generating the framebuffer
-  unsigned int fbo;
-  glGenFramebuffers(1, &fbo);
-  //binding the framebuffer
-  glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-  //creating a texture for the framebuffer
-  glGenTextures(1, &m_tex);
-  glBindTexture(GL_TEXTURE_2D, m_tex);
-
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  //attaching the texture to the framebuffer
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tex, 0);
-  //if(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE)
-  //setting it as the one that's being displayed
-  //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glUseProgram(m_shaders.at("fbo").handle);
-  // first pass
-  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // we're not using the stencil buffer now
-  glEnable(GL_DEPTH_TEST);
-  // DrawScene();	
-    
-  // second pass
-  glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+void ApplicationSolar::renderFramebuffer() const {
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
   glClearColor(1.0f, 1.0f, 1.0f, 1.0f); 
   glClear(GL_COLOR_BUFFER_BIT);
-  
+  glUseProgram(m_shaders.at("fbo").handle);
   glBindVertexArray(quad_object.vertex_AO);
-  glDisable(GL_DEPTH_TEST);
-  glBindTexture(GL_TEXTURE_2D, m_tex);
+  //glDisable(GL_DEPTH_TEST);
+  glBindTexture(GL_TEXTURE_2D, m_tex[0]);
   glDrawArrays(GL_TRIANGLES, 0, 6);
-
-  glDeleteFramebuffers(1, &fbo);
 }
 
 void ApplicationSolar::uploadView() {
@@ -468,6 +448,7 @@ void ApplicationSolar::initializeOrbits() {
 void ApplicationSolar::initializeTextures() {
   //iterating over all planets
   bool extra = false;
+  unsigned int p_tex;
   for (auto i : m_geo) {
     NORMAL:
     auto path = m_resource_path + "textures/" + i->getParent()->getName() + ".png";
@@ -476,10 +457,10 @@ void ApplicationSolar::initializeTextures() {
     }
     //storing the image in texture
     pixel_data texture = texture_loader::file(path);
-    //initialiasing
-    glGenTextures(1, &m_tex);
-    (!extra) ? i->setTexId(0, m_tex) : i->setTexId(1, m_tex);
-    glBindTexture(GL_TEXTURE_2D, m_tex);
+    //initialiasing  
+    glGenTextures(1, &p_tex);
+    (!extra) ? i->setTexId(0, p_tex) : i->setTexId(1, p_tex);
+    glBindTexture(GL_TEXTURE_2D, p_tex);
     
     //parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -526,8 +507,8 @@ void ApplicationSolar::initializeSkybox() {
   glEnableVertexArrayAttrib(skybox_object.vertex_AO, 0);
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-  glGenTextures(1, &m_tex);
-  glBindTexture(GL_TEXTURE_CUBE_MAP, m_tex);
+  glGenTextures(1, &m_tex[1]);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, m_tex[1]);
 
   //saving the textures in the skybox-vector
   std::vector<pixel_data> skybox;
@@ -639,10 +620,10 @@ void ApplicationSolar::initializeGeometry(std::string const& path) {
 void ApplicationSolar::initializeFramebuffer() {
   if ( ! glIsFramebuffer(m_fbo)) {
     glGenFramebuffers(1, &m_fbo);
-    glGenTextures(1, &m_tex);
+    glGenTextures(1, &m_tex[0]);
   }
   glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
-  glBindTexture(GL_TEXTURE_2D, m_tex);
+  glBindTexture(GL_TEXTURE_2D, m_tex[0]);
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_screen_width, m_screen_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 
@@ -650,9 +631,34 @@ void ApplicationSolar::initializeFramebuffer() {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tex, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tex[0], 0);
   assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);   
+}
+
+void ApplicationSolar::initializeQuad() {
+  std::vector<GLfloat> pos = {-1.0f,  1.0f,   0.0f,   1.0f,
+                              -1.0f,  -1.0f,  0.0f,   0.0f,
+                              1.0f,   -1.0f,  1.0f,   0.0f,
+                              -1.0f,  1.0f,   0.0f,   1.0f,
+                              1.0f,   -1.0f,  1.0f,   0.0f,
+                              1.0f,   1.0f,   1.0f,   1.0f};
+  glGenVertexArrays(1, &quad_object.vertex_AO);
+  glBindVertexArray(quad_object.vertex_AO);
+
+  glGenBuffers(GLuint(1), &quad_object.vertex_BO);
+  glBindBuffer(GL_ARRAY_BUFFER, quad_object.vertex_BO);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*pos.size(), pos.data(), GL_STATIC_DRAW);
+  //position information via attributes
+  glEnableVertexArrayAttrib(quad_object.vertex_AO, 0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
+
+  glEnableVertexArrayAttrib(quad_object.vertex_AO, 0);
+  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)(sizeof(float)*2));
+  
+  //setting the draw mode
+  quad_object.draw_mode = GL_TRIANGLE_STRIP;
+  quad_object.num_elements = pos.size() / 4;
 }
 
 ///////////////////////////// callback functions for window events ////////////
