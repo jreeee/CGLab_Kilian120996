@@ -34,13 +34,13 @@ void main()
                                     1.0f/16.0f, 1.0f/8.0f, 1.0f/16.0f);
         //3x3 pixelgrid, corresponding to the kernel
         const vec2 pixelgrid[9] = vec2[]( 
-                                    vec2(-DIST, DIST),  vec2(0.0f, DIST),    vec2(DIST, DIST),
-                                    vec2(-DIST, 0.0f),   vec2(0.0f, 0.0f),     vec2(DIST, 0.0f),
-                                    vec2(-DIST, -DIST), vec2(0.0f, -DIST),   vec2(DIST, -DIST));
+                                    vec2(-DIST, DIST),  vec2(0.0f, DIST),  vec2(DIST, DIST),
+                                    vec2(-DIST, 0.0f),  vec2(0.0f, 0.0f),  vec2(DIST, 0.0f),
+                                    vec2(-DIST, -DIST), vec2(0.0f, -DIST), vec2(DIST, -DIST));
         //setting the res to black
         res = vec3(0.0f, 0.0f, 0.0f);
         //adding up all pixel color values multiplied by their respective kernel value 
-        for (int i = 0; i < kernel.length(); ++i) {
+        for (int i = 0; i < 9; ++i) {
             res += kernel[i] * vec3(texture(texFramebuffer, TxC.st + pixelgrid[i]));
         }
     }

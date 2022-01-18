@@ -732,9 +732,9 @@ void ApplicationSolar::keyCallback(int key, int action, int mods) {
   }
   /*
   the following might look a bit cryptic but is actually quite simple:
-  openGL wuoldn't let me upload four uniform bools so i now use one int instead
+  openGL wouldn't let me upload four uniform bools, so i now use one int instead.
   this works by relying on prime numbers and their cool propreties and is kinda
-  like a fancy bitmask (which i originally wanted to to but found this simpler)
+  like a fancy bitmask (which i originally wanted to to but found this simpler to implement)
   */
   else if (key == GLFW_KEY_7 && action == GLFW_PRESS) {
     m_sfx = (m_sfx % 2 == 0) ? m_sfx / 2 : m_sfx * 2;    
