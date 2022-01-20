@@ -226,7 +226,7 @@ void ApplicationSolar::renderFramebuffer() const {
   glDisable(GL_DEPTH_TEST);
   //binding the texture to the quad and drawing it to the screen
   glBindTexture(GL_TEXTURE_2D, m_tex[0]);
-  glDrawArrays(GL_TRIANGLES, 0, 6);
+  glDrawArrays(quad_object.draw_mode, 0, quad_object.num_elements);
 }
 
 void ApplicationSolar::uploadView() {
@@ -648,35 +648,30 @@ void ApplicationSolar::initializeFramebuffer() {
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glBindTexture(GL_TEXTURE_2D, 0);
   //attaching the texture to the framebuffer
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_tex[0], 0);
   //binding the renderbuffer
   glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
   glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, m_screen_width, m_screen_height);
-  glBindRenderbuffer(GL_RENDERBUFFER, 0);
   //attaching the renderbuffer
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
   //making sure everything went well
   assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);   
 }
 
 void ApplicationSolar::initializeQuad() {
-  //coordinates of the quad
-  std::vector<GLfloat> pos = {-1.0f,  1.0f,   0.0f,   1.0f,
-                              -1.0f,  -1.0f,  0.0f,   0.0f,
-                              1.0f,   -1.0f,  1.0f,   0.0f,
-                              -1.0f,  1.0f,   0.0f,   1.0f,
-                              1.0f,   -1.0f,  1.0f,   0.0f,
-                              1.0f,   1.0f,   1.0f,   1.0f};
+  //coordinates of the quad and texcoords
+  std::vector<GLfloat> data = { -1.0f,  -1.0f,  0.0f,   0.0f,
+                                -1.0f,  1.0f,   0.0f,   1.0f,
+                                1.0f,   -1.0f,  1.0f,   0.0f,
+                                1.0f,   1.0f,   1.0f,   1.0f};
   //generating and binding a VA as with all the other objects
   glGenVertexArrays(1, &quad_object.vertex_AO);
   glBindVertexArray(quad_object.vertex_AO);
 
   glGenBuffers(1, &quad_object.vertex_BO);
   glBindBuffer(GL_ARRAY_BUFFER, quad_object.vertex_BO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*pos.size(), pos.data(), GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(float)*data.size(), data.data(), GL_STATIC_DRAW);
   //position information via attributes
   glEnableVertexArrayAttrib(quad_object.vertex_AO, 0);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 4, 0);
@@ -686,7 +681,7 @@ void ApplicationSolar::initializeQuad() {
   
   //setting the draw mode
   quad_object.draw_mode = GL_TRIANGLE_STRIP;
-  quad_object.num_elements = pos.size() / 4;
+  quad_object.num_elements = data.size() / 4;
 }
 
 ///////////////////////////// callback functions for window events ////////////
